@@ -1,0 +1,230 @@
+<!-- Costuras y Modas — Login base Frontend + botón oculto admin -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costuras y Modas - Login</title>
+    <link rel="icon" type="image/png" href="logo.png" id="favicon">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="registro.css">
+    <style>
+        #loginHeader{ position:fixed; top:0; left:0; right:0; height:52px; background:linear-gradient(180deg, #da92d1fd, #daba90); display:flex; align-items:center; justify-content:center; gap:10px; z-index:10; box-shadow:0 2px 10px rgba(0,0,0,0.12); }
+        #loginHeader img{ width:34px; height:34px; object-fit:cover; border-radius:8px; background:white; display:none; }
+        #mainContainer{ margin-top:62px !important; }
+        .admin-oculto{ position:absolute; width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.05); border:none; cursor:pointer; opacity:0.06; }
+    </style>
+</head>
+<body>
+    <div id="loginHeader">
+        <img id="loginHeaderLogo" src="" alt="logo">
+        <span style="color:white; font-weight:700; font-size:16px; font-family:'Poppins',sans-serif;">Costuras & Modas</span>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <!-- PANTALLA INICIAL DE SELECCIÓN -->
+        <div class="selector-screen" id="selectorScreen">
+            <div class="selector-content">
+                <h1>Costuras & Modas</h1>
+                <p>Selecciona cómo deseas iniciar sesión</p>
+                <div class="selector-buttons">
+                    <button class="selector-btn usuario-btn" id="usuarioBtn"><i class="icon-user">👤</i><span>Usuario Normal</span><small>Acceso a tu cuenta</small></button>
+                    <button class="selector-btn admin-btn" id="adminBtn"><i class="icon-admin">⚙️</i><span>Administrador</span><small>Gestión completa</small></button>
+                </div>
+                <p class="info-text">Selecciona tu tipo de acceso para continuar</p>
+            </div>
+        </div>
+
+        <!-- SLIDER DE FORMULARIOS -->
+        <div class="slider" id="slider" style="display: none;">
+            <!-- FORMULARIOS DE USUARIO NORMAL -->
+            <div class="form-container login-user">
+                <!-- Login Usuario -->
+                <div class="form login" style="position:relative;">
+                    <h2>Iniciar sesión</h2>
+                    <input type="email" placeholder="Correo electrónico" class="user-email" required>
+                    <div class="password-field">
+                        <input type="password" placeholder="Contraseña" class="user-password" minlength="6" required>
+                        <button type="button" class="toggle-password" aria-label="Mostrar contraseña">👁️</button>
+                    </div>
+                    <button type="button" class="btn-submit">Entrar</button>
+                    <p style="position:relative; padding-right:18px;">¿Olvidaste tu contraseña?
+                        <span id="goRecuperar" class="go-link">Restablecer contraseña</span>
+                        <button type="button" id="btnAdminOcultoLogin" class="admin-oculto" style="right:-2px; top:50%; transform:translateY(-50%); position:absolute; width:14px; height:14px; opacity:0.12; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); z-index:5;" title="Admin"></button>
+                    </p>
+                    <p>¿No tienes cuenta?
+                        <span id="goSignup" class="go-link">Regístrate</span>
+                    </p>
+                </div>
+
+                <!-- Signup Usuario -->
+                <div class="form signup" style="position:relative;">
+                    <button class="btn-back" id="backFromUserSignup">← Atrás</button>
+                    <h2>Registrarse</h2>
+                    <input type="text" placeholder="Nombre" class="signup-nombre" minlength="2" required>
+                    <input type="text" placeholder="Apellido" class="signup-apellido" minlength="2" required>
+                    <input type="email" placeholder="Correo electrónico" class="signup-email" required>
+                    <div class="password-field">
+                        <input type="password" placeholder="Contraseña" class="signup-password" minlength="6" required>
+                        <button type="button" class="toggle-password" aria-label="Mostrar contraseña">👁️</button>
+                    </div>
+                    <input type="tel" placeholder="Teléfono" class="signup-telefono" minlength="7" required>
+                    <input type="tel" placeholder="Número de WhatsApp" class="signup-whatsapp" minlength="7" required>
+                    <input type="text" placeholder="Departamento" class="signup-departamento" minlength="2" required>
+                    <input type="text" placeholder="Ciudad" class="signup-ciudad" minlength="2" required>
+                    <label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;color:#fff;text-align:left;margin:4px 0;">
+                        <input type="checkbox" class="signup-terminos" required style="width:14px;height:14px; margin-top:2px;">
+                        <span>Acepto <span class="go-link" id="openTerminosSignup" style="text-decoration:underline;">Términos y Condiciones</span></span>
+                    </label>
+                    <button type="button" class="btn-submit">Crear cuenta</button>
+                    <p style="position:relative; padding-right:18px; text-align:center;">¿Ya tienes cuenta?
+                        <span id="goLogin" class="go-link">Iniciar sesión</span>
+                        <button type="button" id="btnAdminOcultoSignup" class="admin-oculto" style="right:-2px; top:50%; transform:translateY(-50%); position:absolute; width:14px; height:14px; opacity:0.12; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); z-index:5;" title="Admin"></button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- FORMULARIO DE ADMINISTRADOR -->
+            <div class="form-container login-admin">
+                <div class="form admin">
+                    <button class="btn-back" id="backFromAdmin">← Atrás</button>
+                    <h2>Acceso Administrador</h2>
+                    <p class="admin-info">Ingresa tus credenciales de administrador</p>
+                    <input type="text" placeholder="Usuario administrador" class="admin-user" required>
+                    <div class="password-field">
+                        <input type="password" placeholder="Contraseña de administrador" class="admin-password" required>
+                        <button type="button" class="toggle-password" aria-label="Mostrar contraseña">👁️</button>
+                    </div>
+                    <button type="button" class="btn-submit">Acceder como Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div id="recuperarOverlay" class="recuperar-overlay" hidden>
+        <div class="recuperar-modal">
+            <button class="recuperar-close" id="recuperarClose" aria-label="Cerrar">&times;</button>
+            <div id="recuperarPaso1">
+                <h3>Recuperar contraseña</h3>
+                <p class="recuperar-help">Ingresa el correo, el nombre y el teléfono con los que te registraste.</p>
+                <input type="email" id="recuperarEmail" placeholder="Correo electrónico" required>
+                <input type="text" id="recuperarNombre" placeholder="Nombre (como te registraste)" required>
+                <input type="tel" id="recuperarTelefono" placeholder="Teléfono / WhatsApp registrado" required>
+                <button type="button" class="btn-submit" id="btnVerificarDatos">Verificar datos</button>
+                <p class="recuperar-foot"><span id="volverLogin" class="go-link">Volver al login</span></p>
+            </div>
+            <div id="recuperarLinkBox" hidden class="recuperar-linkbox">
+                <p class="recuperar-help" style="color:#059669;">✓ Datos verificados. Para demo, úsalo aquí:</p>
+                <a id="recuperarLink" href="#" target="_blank" class="recuperar-link"></a>
+                <p class="recuperar-help" style="font-size:11px;">Expira en 1 hora.</p>
+            </div>
+            <div id="recuperarPaso2" hidden>
+                <h3>Restablecer contraseña</h3>
+                <p class="recuperar-help">Ingresa tu nueva contraseña (mín. 6 caracteres)</p>
+                <input type="hidden" id="recuperarToken">
+                <div class="password-field"><input type="password" id="recuperarNueva" placeholder="Nueva contraseña" minlength="6" required><button type="button" class="toggle-password">👁️</button></div>
+                <div class="password-field"><input type="password" id="recuperarConfirmar" placeholder="Confirmar contraseña" minlength="6" required><button type="button" class="toggle-password">👁️</button></div>
+                <button type="button" class="btn-submit" id="btnRestablecer">Restablecer contraseña</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="terminosOverlay" class="recuperar-overlay" hidden>
+        <div class="recuperar-modal" style="max-width:480px;">
+            <button class="recuperar-close" id="terminosClose" aria-label="Cerrar">&times;</button>
+            <h3>📄 Términos y Condiciones</h3>
+            <div id="terminosTexto" style="font-size:12px;color:#1F1B24;text-align:left;max-height:50vh;overflow-y:auto;line-height:1.5;white-space:pre-wrap;"></div>
+            <button type="button" class="btn-submit" id="terminosAceptar">Aceptar</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        (function(){
+            const logoEl=document.getElementById('loginHeaderLogo');
+            function setFavicon(url){
+                try{
+                    let link=document.getElementById('favicon');
+                    if(!link){ link=document.createElement('link'); link.id='favicon'; link.rel='icon'; link.type='image/png'; document.head.appendChild(link); }
+                    link.href=url;
+                    // también shortcut icon
+                    let link2=document.querySelector('link[rel="shortcut icon"]');
+                    if(link2) link2.href=url;
+                }catch(e){}
+            }
+            try{ fetch('api/configuracion.php').then(r=>r.json()).then(c=>{
+                if(c.logo&&logoEl){logoEl.src=c.logo;logoEl.style.display='block'; setFavicon(c.logo);}
+                else if(c.logo){ setFavicon(c.logo); }
+                const t=document.querySelector('#loginHeader span'); if(c.nombreEmpresa&&t) t.textContent=c.nombreEmpresa;
+                if(c.nombreEmpresa) document.title = c.nombreEmpresa + ' - Login';
+            }); }catch(e){}
+            function goAdmin(e){
+                if(e){ e.preventDefault(); e.stopPropagation(); }
+                // FIX: usa la función global robusta de script.js (no depende de transform)
+                if(window.mostrarAdmin) window.mostrarAdmin();
+                else if(window.showSlider && window.POS) window.showSlider(window.POS.ADMIN);
+                else {
+                    // fallback directo si script.js aún no cargó
+                    const sel=document.getElementById('selectorScreen');
+                    const slider=document.getElementById('slider');
+                    const loginCont=document.querySelector('.form-container.login-user');
+                    const adminCont=document.querySelector('.form-container.login-admin');
+                    const loginForm=document.querySelector('.form.login');
+                    const signupForm=document.querySelector('.form.signup');
+                    const adminForm=document.querySelector('.form.admin');
+                    if(sel) sel.style.display='none';
+                    if(slider){ slider.style.display='flex'; slider.style.transform='none'; }
+                    if(loginCont) loginCont.style.display='none';
+                    if(adminCont) adminCont.style.display='flex';
+                    if(loginForm) loginForm.style.display='none';
+                    if(signupForm) signupForm.style.display='none';
+                    if(adminForm) adminForm.style.display='flex';
+                }
+                // feedback visual para confirmar que sí llevó a algo
+                try{ const toast=document.getElementById('toast'); if(toast){ toast.textContent='🔐 Acceso administrador'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1800); } }catch(err){}
+            }
+            // FIX: botón oculto ahora es más clickeable y con delegación global (evita "no lleva a nada")
+            function attachHidden(){
+                const b1=document.getElementById('btnAdminOcultoLogin');
+                const b2=document.getElementById('btnAdminOcultoSignup');
+                if(b1){ b1.style.width='18px'; b1.style.height='18px'; b1.style.opacity='0.18'; b1.style.cursor='pointer'; b1.addEventListener('click', goAdmin); }
+                if(b2){ b2.style.width='18px'; b2.style.height='18px'; b2.style.opacity='0.18'; b2.style.cursor='pointer'; b2.addEventListener('click', goAdmin); }
+            }
+            attachHidden();
+            // delegación por si el DOM se recrea
+            document.addEventListener('click', function(e){
+                const t=e.target.closest && e.target.closest('#btnAdminOcultoLogin, #btnAdminOcultoSignup');
+                if(t){ goAdmin(e); }
+            });
+            // triple-click en el header también abre admin (discreto)
+            let clicks=0, timer=null;
+            const header=document.getElementById('loginHeader');
+            if(header) header.addEventListener('click', function(){
+                clicks++; clearTimeout(timer);
+                timer=setTimeout(()=>{clicks=0;}, 600);
+                if(clicks>=3){ clicks=0; goAdmin(); }
+            });
+            // alternativamente, presionar "admin" + Enter en cualquier input no hace nada, pero dejamos atajo teclado Alt+A
+            document.addEventListener('keydown', function(e){
+                if(e.altKey && (e.key==='a' || e.key==='A')){ e.preventDefault(); goAdmin(); }
+            });
+            const prefill=new URLSearchParams(window.location.search).get('prefill');
+            if(prefill){
+                // espera a que script.js haya inicializado el form
+                setTimeout(function(){ const inp=document.querySelector('.user-email'); if(inp) inp.value=prefill; }, 200);
+            }
+            // hash handling delega a script.js, pero asegura fallback
+            function handleHash(){
+                const h=window.location.hash;
+                if(h==='#admin'){ setTimeout(goAdmin,120); }
+                else if(h==='#usuario' || h==='#login'){ if(window.mostrarLogin) setTimeout(window.mostrarLogin,100); }
+                else if(h==='#registro' || h==='#signup'){ if(window.mostrarSignup) setTimeout(window.mostrarSignup,100); }
+            }
+            handleHash();
+            window.addEventListener('hashchange', handleHash);
+        })();
+    </script>
+</body>
+</html>

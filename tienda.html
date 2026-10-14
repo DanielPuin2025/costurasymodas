@@ -1,0 +1,407 @@
+<!-- =========================================================
+  Costuras y Modas — tienda.html
+  Escaparate: header, buscador, productos, carrito y solicitudes
+========================================================= -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costuras & Modas - Tienda</title>
+    <link rel="icon" type="image/png" href="logo.png" id="favicon">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet"> <!-- Fuentes Playfair + DM Sans -->
+    <link rel="stylesheet" href="tienda.css"> <!-- Estilos de la tienda -->
+</head>
+
+<body>
+
+    <!-- ====== HEADER: logo, buscador, carrito, perfil y menú (3 rayas) ====== -->
+    <header>
+        <div class="header-inner">
+            <div class="header-icons-left">
+                <button class="icon-btn" id="cartBtn" title="Carrito" onclick="openCart()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 01-8 0" />
+                    </svg>
+                    <span class="cart-badge" id="cartCount">0</span>
+                </button>
+            </div>
+
+            <div class="header-title">
+                <h1>Costuras & Modas</h1>
+                <span>Colección 2026</span>
+            </div>
+
+            <div class="header-icons-right">
+                <button class="icon-btn" title="Buscar"
+                    onclick="document.querySelector('.search-input-wrap input').focus()">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Perfil" onclick="abrirPerfil()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </button>
+                <button class="icon-btn" title="Menú" onclick="abrirMenu()">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <div class="search-input-wrap">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" placeholder="Buscar Camisas, Pantalones, Overoles..." id="searchInput">
+            </div>
+        </div>
+    </header>
+
+    <!-- ====== DISPONIBILIDAD / HORARIO: muestra si la tienda está Abierta/Cerrada en vivo ====== -->
+    <div id="disponibilidadBanner" class="disponibilidad-banner" hidden>
+        <!-- se llena por JS: Abierto / Cerrado + horario + WhatsApp -->
+    </div>
+
+    <!-- ====== CATEGORÍAS: filtros por tipo de prenda ====== -->
+    <div class="categories">
+        <div class="categories-inner">
+            <button class="cat-pill active" onclick="filterCat(this, 'todos')">Todos</button>
+            <button class="cat-pill" onclick="filterCat(this, 'Camisas')">👕 Camisas</button>
+            <button class="cat-pill" onclick="filterCat(this, 'Pantalones')">👖 Pantalones</button>
+            <button class="cat-pill" onclick="filterCat(this, 'Chaquetas')">🧥 Chaquetas</button>
+            <button class="cat-pill" onclick="filterCat(this, 'Uniformes')">👔 Uniformes</button>
+            <button class="cat-pill" onclick="filterCat(this, 'Overoles')">🦺 Overoles</button>
+            <button class="cat-pill" onclick="filterCat(this, 'Ofertas')">🔥 Ofertas</button>
+        </div>
+    </div>
+
+    <!-- ====== COLORES: filtros por color (dinámico, como el de categoría) ====== -->
+    <div class="categories" id="colorFilterRow" hidden>
+        <div class="categories-inner" id="colorPillsInner">
+            <!-- Los pills de color los genera JS según los productos cargados -->
+        </div>
+    </div>
+
+    <!-- ====== HERO: banner principal con eslogan e invitación a explorar ====== -->
+    <div class="hero" id="inicio">
+        <div class="hero-card">
+            <div class="hero-text">
+                <span class="tag">Nueva Colección</span>
+                <h2>Elegancia<br><em>hecha a mano</em></h2>
+                <p>Descubre piezas únicas confeccionadas con amor y detalle. Moda que cuenta tu historia.</p>
+                <button class="hero-btn">
+                    Explorar ahora
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </button>
+            </div>
+            <div class="hero-emoji">👗</div>
+        </div>
+    </div>
+
+    <!-- ====== PRODUCTOS: grilla que JS rellena con los productos disponibles ====== -->
+    <div class="products-section" id="productos-section">
+        <div class="section-top">
+            <h3>Productos destacados</h3>
+            <select class="sort-select">
+                <option>Más populares</option>
+                <option>Precio: menor a mayor</option>
+                <option>Precio: mayor a menor</option>
+                <option>Más nuevos</option>
+            </select>
+        </div>
+
+        <div class="products-grid" id="productsGrid">
+            <!-- Cards generadas por JS -->
+        </div>
+    </div>
+
+    <!-- ====== PAGINACIÓN: navegación entre páginas de productos ====== -->
+    <div class="pagination-wrap">
+        <button class="page-btn nav" onclick="changePage('first')">← Primera</button>
+        <button class="page-btn num active" onclick="changePage(1)">1</button>
+        <button class="page-btn num" onclick="changePage(2)">2</button>
+        <button class="page-btn num" onclick="changePage(3)">3</button>
+        <button class="page-btn nav" onclick="changePage('last')">Última →</button>
+    </div>
+
+    <!-- ====== TOAST: notificación flotante ====== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ====== PERFIL: modal con datos del usuario logueado ====== -->
+    <div class="modal-overlay" id="perfilModal" hidden onclick="if(event.target===this) cerrarPerfil()">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Mi Perfil</h3>
+                <button class="modal-close" onclick="cerrarPerfil()">&times;</button>
+            </div>
+            <div id="perfilBody" class="perfil-body">
+                <!-- Se llena por JS: sesión activa o invitado -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MENÚ (3 rayas): Mis solicitudes + Cerrar sesión ====== -->
+    <div class="menu-overlay" id="menuOverlay" onclick="cerrarMenu()"></div> <!-- Fondo oscuro del menú -->
+    <aside class="menu-panel" id="menuPanel"> <!-- Panel lateral del menú -->
+        <div class="menu-panel-header">
+            <h3>☰ Menú</h3>
+            <button class="cart-close" onclick="cerrarMenu()">&times;</button>
+        </div>
+        <div class="menu-panel-body" id="menuBody">
+            <button type="button" class="menu-logout-btn" id="btnMisSolicitudes" style="margin-bottom:12px;background:linear-gradient(135deg,#f0567a,#c084fc);color:white;border:none;">
+                 📋 Mis solicitudes
+            </button>
+            <!-- Info del taller en el menú, no en footer -->
+            <div style="background:#FBF7F9;border:1px solid #E8E0E6;border-radius:12px;padding:12px;margin-bottom:12px;">
+                <strong style="color:#7B2D5E;">🏠 Taller Costuras y Modas</strong><br>
+                <small style="color:#7A7079;">📞 <span id="tallerTelefoMenu">—</span><br>
+                🕒 <span id="tallerHorarioMenu">Lunes a Sábado 08:00-18:00</span><br>
+                ⏳ Espera: <span id="tallerEsperaMenu">10 días</span><br>
+                💳 Nequi: <span id="nequiMenu">—</span> (anticipo 40.000 COP)</small>
+            </div>
+            <a id="tallerWhatsAppMenu" href="#" target="_blank" style="display:none;background:#25D366;color:white;padding:10px 14px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;text-align:center;margin-bottom:12px;">💬 WhatsApp del taller</a>
+            <button type="button" class="menu-logout-btn" id="btnCerrarSesionMenu">
+                 📴 Cerrar sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- ====== MODAL MIS SOLICITUDES: lista estados + código + WhatsApp admin ====== -->
+    <div class="modal-overlay" id="solicitudesModal" hidden onclick="if(event.target===this) cerrarSolicitudes()">
+        <div class="modal-box" style="max-width:520px;">
+            <div class="modal-header">
+                <h3>📋 Mis solicitudes</h3>
+                <button class="modal-close" onclick="cerrarSolicitudes()">&times;</button>
+            </div>
+            <div id="solicitudesBody" class="perfil-body" style="text-align:left;max-height:60vh;overflow-y:auto;">
+                <!-- Se llena por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== LOGIN ELECCIÓN (MercadoLibre): se abre al dar Solicitar sin sesión + botón admin oculto (FIX: ahora sí lleva a admin) ====== -->
+    <div class="modal-overlay" id="loginChoiceModal" hidden onclick="if(event.target===this) cerrarLoginChoice()">
+        <div class="modal-box" style="max-width:400px;position:relative;">
+            <!-- Botón admin oculto: FIX tamaño/opacity y navegación robusta (evita "lleva a nada") -->
+            <button id="btnAdminOculto" title="Admin" aria-label="Admin" style="position:absolute;bottom:8px;right:10px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.08);cursor:pointer;opacity:0.22;z-index:5;" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='costuras_y_modas.html#admin';"></button>
+            <div class="modal-header">
+                <h3>Para solicitar, ingresa</h3>
+                <button class="modal-close" onclick="cerrarLoginChoice()">&times;</button>
+            </div>
+            <div style="padding:16px;">
+                <p style="font-size:13px;color:#7A7079;margin-bottom:12px;">Como en Mercado Libre: si ya tienes cuenta inicia sesión, si no regístrate. Tu carrito se guarda.</p>
+                <input type="email" id="loginChoiceEmail" placeholder="E-mail o teléfono" style="width:100%;padding:10px 12px;border:1.5px solid #E8E0E6;border-radius:10px;margin-bottom:10px;">
+                <button class="btn btn-primary btn-block" onclick="continuarLoginChoice()">Continuar</button>
+                <div style="text-align:center;margin:10px 0;">
+                    <a href="costuras_y_modas.html#usuario" style="color:#D9488F;font-size:13px;font-weight:600;text-decoration:none;">Crear cuenta</a>
+                    <span style="color:#E8E0E6;"> • </span>
+                    <a href="costuras_y_modas.html#usuario" style="color:#6366f1;font-size:12px;text-decoration:underline;">Iniciar sesión</a>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin:12px 0;color:#7A7079;font-size:11px;"><span style="flex:1;height:1px;background:#E8E0E6;"></span>o<span style="flex:1;height:1px;background:#E8E0E6;"></span></div>
+                <button class="btn btn-outline btn-block" onclick="window.location.href='costuras_y_modas.html#usuario'">Ir al login completo</button>
+                <p style="font-size:10px;color:#9b7b8a;text-align:center;margin-top:10px;"><span style="display:inline-flex;gap:4px;align-items:center;">🔒 Tengo un problema de seguridad</span> • Necesito ayuda con otros temas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== CARRITO: overlay + panel lateral con productos y total ====== -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div> <!-- Fondo del carrito -->
+    <aside class="cart-panel" id="cartPanel"> <!-- Panel del carrito -->
+        <div class="cart-panel-header">
+            <h3>🛒 Tu Carrito</h3>
+            <button class="cart-close" id="cartCloseBtn" onclick="closeCart()">&times;</button>
+        </div>
+        <div class="cart-panel-body" id="cartBody">
+            <!-- Se llena por JS: estado vacío o lista de productos -->
+        </div>
+        <div class="cart-panel-footer" id="cartFooter" hidden>
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span id="cartTotal">$0</span>
+            </div>
+            <button class="hero-btn cart-checkout-btn" id="cartCheckoutBtn" onclick="abrirCheckout()">
+                Solicitar pedido
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                </svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ====== DETALLE DE PRODUCTO: panel lateral con foto, info y botón solicitar ====== -->
+    <div class="product-detail-overlay" id="productDetailOverlay" onclick="if(event.target===this) cerrarDetalleProducto()"></div>
+    <aside class="product-detail-panel" id="productDetailPanel">
+        <div class="product-detail-header">
+            <h3 id="detailProductName">Detalle del producto</h3>
+            <button class="cart-close" onclick="cerrarDetalleProducto()">&times;</button>
+        </div>
+        <div class="product-detail-body" id="productDetailBody">
+            <!-- Se llena por JS -->
+        </div>
+    </aside>
+
+    <!-- ====== CHECKOUT / SOLICITUD: formulario que envía pedido al admin con teléfono ====== -->
+    <div class="modal-overlay" id="checkoutModal" hidden>
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Enviar solicitud al administrador</h3>
+                <button class="modal-close" id="checkoutCloseBtn" onclick="cerrarCheckout()">&times;</button>
+            </div>
+            <form class="modal-form" id="checkoutForm">
+                <p style="font-size:13px;color:#9b7b8a;margin-bottom:14px;">Tu número se enviará al admin. Él te confirmará con un <strong>código de verificación</strong>.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="checkoutNombre">Nombre</label>
+                        <input type="text" id="checkoutNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutApellido">Apellido</label>
+                        <input type="text" id="checkoutApellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutTelefono">Teléfono / WhatsApp</label>
+                        <input type="tel" id="checkoutTelefono" placeholder="3001234567" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutDireccion">Dirección</label>
+                        <input type="text" id="checkoutDireccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutCiudad">Ciudad</label>
+                        <input type="text" id="checkoutCiudad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutDepartamento">Departamento</label>
+                        <input type="text" id="checkoutDepartamento" required>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label for="checkoutMetodoPago">Método de pago *</label>
+                        <select id="checkoutMetodoPago" required>
+                            <option value="taller_fisico">Cliente paga y va al local — Pago en taller / Retiro</option>
+                            <option value="contraentrega">Contraentrega por Nequi — Anticipo 40.000 COP</option>
+                        </select>
+                        <small id="checkoutPagoHelp" style="font-size:11px;color:#7A7079;margin-top:4px;display:block;"></small>
+                    </div>
+                </div>
+                <!-- Anticipo Contraentrega por Nequi info (40k) -->
+                <div id="nequiInfoBox" hidden style="background:#fef9e7;border:1px solid #fcd34d;border-radius:10px;padding:10px;margin-top:10px;font-size:12px;">
+                    <strong>Contraentrega por Nequi — Anticipo 40.000 COP</strong>
+                    <div>Nequi: <span id="nequiNumeroDisplay">—</span></div>
+                    <small>Anticipo vía Nequi. Si no estás en el lugar a la hora acordada sin avisar, se retiene el anticipo por tiempo perdido.</small>
+                </div>
+                <!-- Taller info -->
+                <div id="tallerInfoBox" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px;margin-top:10px;font-size:12px;display:flex;gap:10px;align-items:center;">
+                    <img id="tallerFotoDisplay" src="" alt="Taller" style="width:60px;height:60px;object-fit:cover;border-radius:8px;display:none;">
+                    <div>
+                        <strong>📍 Taller: <span id="tallerDireccionDisplay">—</span></strong><br>
+                        <small>📞 <span id="tallerTelefonoDisplay">—</span> • ⏳ Espera: <span id="tallerEsperaDisplay">1-2 semanas</span></small>
+                    </div>
+                </div>
+                <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:12px;">
+                    <input type="checkbox" id="checkoutTerminos" required style="margin-top:2px;">
+                    <span>Acepto <span class="go-link" id="openTerminosCheckout" style="color:#D9488F;text-decoration:underline;cursor:pointer;">Términos y Condiciones</span> (2 métodos: pago en local y contraentrega por Nequi)</span>
+                </label>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary-modal" onclick="cerrarCheckout()">Cancelar</button>
+                    <button type="submit" class="btn-primary-modal">Enviar solicitud</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Términos y Condiciones (tienda) -->
+    <div id="terminosOverlayTienda" class="modal-overlay" hidden onclick="if(event.target===this) cerrarTerminosTienda()">
+        <div class="modal-box" style="max-width:480px;">
+            <div class="modal-header"><h3>📄 Términos y Condiciones</h3><button class="modal-close" onclick="cerrarTerminosTienda()">&times;</button></div>
+            <div id="terminosTextoTienda" style="padding:16px;font-size:12px;line-height:1.5;white-space:pre-wrap;max-height:60vh;overflow-y:auto;"></div>
+            <div style="padding:0 16px 16px;"><button class="btn-primary-modal" onclick="cerrarTerminosTienda()" style="width:100%;">Aceptar</button></div>
+        </div>
+    </div>
+
+    <!-- Footer taller oculto: la info del taller solo aparece en el menú -->
+
+    <!-- ====== MOBILE NAV: barra inferior solo en celular ====== -->
+    <nav class="mobile-nav">
+        <button class="mob-btn active">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Inicio
+        </button>
+        <button class="mob-btn">
+            <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            Buscar
+        </button>
+        <button class="mob-btn">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
+            Favoritos
+        </button>
+        <button class="mob-btn" onclick="openCart()">
+            <svg viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 01-8 0" />
+            </svg>
+            Carrito
+        </button>
+        <button class="mob-btn" onclick="abrirPerfil()">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
+            Perfil
+        </button>
+    </nav>
+
+    <!-- FIX acceso admin oculto también por triple-click header y Alt+A (por si el puntito falla) -->
+    <script>
+        (function(){
+            let clicks=0,timer=null;
+            document.addEventListener('click', function(e){
+                const header=document.querySelector('header');
+                if(header && header.contains(e.target)){
+                    clicks++; clearTimeout(timer); timer=setTimeout(()=>clicks=0,600);
+                    if(clicks>=3){ clicks=0; window.location.href='costuras_y_modas.html#admin'; }
+                }
+            });
+            document.addEventListener('keydown', function(e){
+                if(e.altKey && (e.key==='a'||e.key==='A')){ e.preventDefault(); window.location.href='costuras_y_modas.html#admin'; }
+            });
+            // asegura que el botón oculto del modal siempre navegue
+            const btn=document.getElementById('btnAdminOculto');
+            if(btn) btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href='costuras_y_modas.html#admin'; });
+        })();
+    </script>
+    <!-- Lógica de la tienda: filtros, carrito, solicitudes y disponibilidad -->
+    <script src="tienda.js"></script>
+</body>
+
+</html>

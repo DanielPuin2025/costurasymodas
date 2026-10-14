@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    environment:
+      - DB_HOST=${DB_HOST:-db}
+      - DB_NAME=${DB_NAME:-costuras_y_modas}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+    depends_on:
+      - db
+    volumes:
+      - ./:/var/www/html/
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-root}
+      - MYSQL_DATABASE=${DB_NAME:-costuras_y_modas}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./costuras_y_modas.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+volumes:
+  db_data:
