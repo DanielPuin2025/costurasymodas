@@ -2,7 +2,9 @@
 
 ## Información del Proyecto
 
-- **Dominio**: https://costuras&modas.programamega.com
+- **Dominio**: https://costurasymodas.programamega.com
+- **IP VPS**: 144.126.156.160
+- **TTL DNS**: 14400
 - **Repositorio**: https://github.com/DanielPuin2025/costurasymodas
 - **Proyecto Easypanel**: preicfesonline
 

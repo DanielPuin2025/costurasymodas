@@ -3,7 +3,15 @@
     "allow": [
       "Bash(git config *)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Agregar guía de despliegue para Easypanel *)",
+      "WebFetch(domain:144.126.156.160)",
+      "Bash(start http://144.126.156.160:3000/)",
+      "Bash(curl -X GET http://144.126.156.160:3000/api/projects -H 'Authorization: Bearer 5c8430ed19ba6f01defb587e23e9be8b919c14cdfe070206558c25b9844e983a' -H 'Content-Type: application/json')"
     ]
   }
 }

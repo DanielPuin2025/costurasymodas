@@ -46,4 +46,4 @@ $password = 'tu_password';
 
 Este proyecto está configurado para desplegarse en Easypanel.
 
-Dominio: https://costuras&modas.programamega.com
+Dominio: https://costurasymodas.programamega.com
