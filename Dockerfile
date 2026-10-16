@@ -14,8 +14,8 @@ RUN mv /var/www/html/costuras_y_modas.sql /opt/costuras_y_modas.sql \
     && chmod +x /usr/local/bin/entrypoint.sh \
     && chown -R www-data:www-data /var/www/html
 
-RUN printf '<Directory /var/www/html/>\n    Options FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>\n' > /etc/apache2/conf-available/docker-php.conf \
-    && a2enconf docker-php
+RUN printf '<Directory /var/www/html/>\n    Options FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>\n' > /etc/apache2/conf-available/costuras.conf \
+    && a2enconf costuras
 
 EXPOSE 80
 
