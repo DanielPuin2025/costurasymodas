@@ -12,8 +12,6 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-root}
     depends_on:
       - db
-    volumes:
-      - ./:/var/www/html/
     restart: unless-stopped
 
   db:
@@ -23,7 +21,6 @@ services:
       - MYSQL_DATABASE=${DB_NAME:-costuras_y_modas}
     volumes:
       - db_data:/var/lib/mysql
-      - ./costuras_y_modas.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
 
 volumes:

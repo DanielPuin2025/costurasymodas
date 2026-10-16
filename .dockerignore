@@ -1,0 +1,6 @@
+.git
+.claude
+.vscode
+.env
+*.md
+docker-compose.yml

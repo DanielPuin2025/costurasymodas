@@ -1,26 +1,22 @@
 FROM php:8.2-apache
 
-# Instalar extensiones de PHP necesarias
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN docker-php-ext-install pdo pdo_mysql mysqli \
+    && a2enmod rewrite
 
-# Habilitar mod_rewrite de Apache
-RUN a2enmod rewrite
-
-# Copiar archivos del proyecto
 COPY . /var/www/html/
 
-# Establecer permisos
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# El SQL y los scripts de arranque quedan fuera del directorio público
+RUN mv /var/www/html/costuras_y_modas.sql /opt/costuras_y_modas.sql \
+    && mv /var/www/html/docker/init-db.php /opt/init-db.php \
+    && mv /var/www/html/docker/entrypoint.sh /usr/local/bin/entrypoint.sh \
+    && rm -rf /var/www/html/docker \
+    && sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh \
+    && chown -R www-data:www-data /var/www/html
 
-# Configurar Apache para permitir .htaccess
-RUN echo '<Directory /var/www/html/>\n\
-    Options Indexes FollowSymLinks\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>' > /etc/apache2/conf-available/docker-php.conf \
+RUN printf '<Directory /var/www/html/>\n    Options FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>\n' > /etc/apache2/conf-available/docker-php.conf \
     && a2enconf docker-php
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["/usr/local/bin/entrypoint.sh"]
