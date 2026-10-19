@@ -6,10 +6,12 @@ RUN docker-php-ext-install pdo pdo_mysql mysqli \
 COPY . /var/www/html/
 
 # El SQL y los scripts de arranque quedan fuera del directorio público
-RUN mv /var/www/html/costuras_y_modas.sql /opt/costuras_y_modas.sql \
+RUN mv "/var/www/html/Base de datos/costuras_y_modas.sql" /opt/costuras_y_modas.sql \
     && mv /var/www/html/docker/init-db.php /opt/init-db.php \
+    && mv /var/www/html/docker/migrate-db.php /opt/migrate-db.php \
     && mv /var/www/html/docker/entrypoint.sh /usr/local/bin/entrypoint.sh \
     && rm -rf /var/www/html/docker \
+    && rm -rf "/var/www/html/Base de datos" \
     && sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
     && chmod +x /usr/local/bin/entrypoint.sh \
     && chown -R www-data:www-data /var/www/html
