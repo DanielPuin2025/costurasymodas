@@ -3,6 +3,18 @@
 # Habilitar rewrite engine
 RewriteEngine On
 
+# Redirigir raíz a Fronend/tienda.html
+RewriteRule ^$ /Fronend/tienda.html [L,R=301]
+
+# Redirigir /tienda.html a /Fronend/tienda.html
+RewriteRule ^tienda\.html$ /Fronend/tienda.html [L,R=301]
+
+# Redirigir /panel.html a /Fronend/panel.html
+RewriteRule ^panel\.html$ /Fronend/panel.html [L,R=301]
+
+# Redirigir /costuras_y_modas.html a /Fronend/costuras_y_modas.html
+RewriteRule ^costuras_y_modas\.html$ /Fronend/costuras_y_modas.html [L,R=301]
+
 # Redirigir a HTTPS (descomentar en producción)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

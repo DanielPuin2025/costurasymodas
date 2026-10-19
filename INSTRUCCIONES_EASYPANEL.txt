@@ -1,0 +1,125 @@
+╔═══════════════════════════════════════════════════════════════╗
+║  INSTRUCCIONES PARA ACTUALIZAR EN EASYPANEL                   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✅ CÓDIGO ACTUALIZADO Y SUBIDO A GITHUB
+
+Ahora sigue estos pasos en Easypanel:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 1: IR A TU PROYECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Entra a Easypanel
+2. Busca tu proyecto "costurasymodas" o "costuras_y_modas"
+3. Click en el servicio "web"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 2: REBUILD EL CONTENEDOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Opción A - Rebuild Manual (Recomendado):
+   1. Click en el botón "Rebuild" o "Reconstruir"
+   2. Espera 2-5 minutos mientras se construye
+   3. El contenedor se reiniciará automáticamente
+
+Opción B - Si tienes Auto-Deploy activado:
+   - Los cambios se desplegarán automáticamente
+   - Espera 5-10 minutos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 3: VERIFICAR LOGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Click en la pestaña "Logs" del servicio web
+2. Busca estos mensajes:
+
+   ✅ [entrypoint] Iniciando configuración de base de datos...
+   ✅ [init-db] la base ya tiene datos, no se importa
+   ✅ [entrypoint] Aplicando migraciones...
+   ✅ [migrate-db] Conexión exitosa
+   ✅ [migrate-db] Actualizando configuración...
+   ✅ [migrate-db] Migraciones completadas exitosamente
+   ✅ [entrypoint] Iniciando Apache...
+
+3. Si ves estos mensajes, ¡todo está bien! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 4: PROBAR EL SITIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Ve a: https://costurasymodas.programamega.com/Fronend/
+
+2. Prueba el login con:
+   Email:    admin@costurasymodas.com
+   Password: admin123
+
+3. Si puedes entrar al panel, ¡la base de datos está actualizada! ✅
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+¿QUÉ HACE EL SISTEMA AUTOMÁTICO?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Al hacer rebuild, automáticamente:
+
+✅ Detecta si la base de datos existe
+✅ Si NO existe: Crea todo desde cero (init-db.php)
+✅ Si SÍ existe: Aplica solo las migraciones (migrate-db.php)
+✅ NO borra tus datos existentes
+✅ Actualiza solo lo necesario:
+   - Tabla password_resets (si no existe)
+   - Configuración de admin
+   - Usuario admin con password correcto
+   - Categorías por defecto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CAMBIOS APLICADOS EN ESTA ACTUALIZACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Nueva estructura de directorios:
+   - Frontend: /Fronend/
+   - Backend:  /backend/api/
+   - Base de datos actualizada con todos los cambios
+
+✅ Rutas de API actualizadas en el frontend
+
+✅ Sistema de migraciones automático
+
+✅ Base de datos con última versión del schema
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si el sitio no carga o el login no funciona:
+
+1. Verifica que el servicio "db" esté corriendo (verde)
+2. Revisa los logs del servicio "web"
+3. Ejecuta manualmente las migraciones:
+   - Click en "Terminal" del servicio web
+   - Ejecuta: php /opt/migrate-db.php
+
+4. Si nada funciona, puedes reiniciar todo:
+   - Click en "Stop" del servicio web
+   - Click en "Start"
+   - Espera 1-2 minutos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CREDENCIALES ACTUALIZADAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Usuario Admin (Login):
+   Email:    admin@costurasymodas.com
+   Password: admin123
+
+Panel Admin (Configuración):
+   Usuario:  DSBJ
+   Password: DSBJ24032009
+
+⚠️  IMPORTANTE: Cambia estas credenciales después del primer login
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Para más detalles, lee: EASYPANEL_DEPLOY.md
+
+¡Listo para hacer el rebuild en Easypanel! 🚀
