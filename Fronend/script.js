@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  const API_CANDIDATES = ['api/', ''];
+  const API_CANDIDATES = ['../backend/api/', 'backend/api/', 'api/', ''];
 
   const LS = {
     userSession: 'cym_user_session',

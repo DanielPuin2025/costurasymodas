@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  const API_CANDIDATES = ['api/',''];
+  const API_CANDIDATES = ['../backend/api/','backend/api/','api/',''];
   const LS_CARRITO = 'cym_carrito';
   const LS_USER_SESSION = 'cym_user_session';
   const LOGIN_PAGE = 'costuras_y_modas.html';
