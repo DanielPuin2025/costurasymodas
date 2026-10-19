@@ -63,6 +63,14 @@
         <button id="btn-nuevo-producto" class="btn btn-primary" type="button">+ Nuevo Producto</button>
       </div>
 
+      <!-- Filtro de categorías para organizar productos -->
+      <div class="panel-toolbar" style="margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <label for="panelFiltroCategoria" style="font-size:13px;font-weight:600;color:#1F1B24;">Categoría</label>
+        <select id="panelFiltroCategoria" style="flex:1;max-width:480px;padding:10px 16px;border:1.5px solid #E8E0E6;border-radius:8px;font-size:14px;">
+          <option value="todos">Todas las categorías</option>
+        </select>
+      </div>
+
       <form id="producto-form" class="card form-card" hidden>
         <h2 id="producto-form-title" class="card-title">Nuevo Producto</h2>
         <input type="hidden" id="producto-id">
@@ -76,14 +84,6 @@
             <span class="field-label">Categoría (tipo de ropa)</span>
             <select id="producto-categoria" required> <!-- Filtro de ropa -->
               <option value="" disabled selected>Selecciona tipo</option>
-              <option value="Camisas">👕 Camisas</option>
-              <option value="Pantalones">👖 Pantalones</option>
-              <option value="Chaquetas">🧥 Chaquetas</option>
-              <option value="Uniformes">👔 Uniformes</option>
-              <option value="Overoles">🦺 Overoles</option>
-              <option value="Vestidos">👗 Vestidos</option>
-              <option value="Ofertas">🔥 Ofertas</option>
-              <option value="General">🧵 General</option>
             </select>
           </label>
           <label class="field">
@@ -290,12 +290,27 @@
           </label>
         </div>
         <label class="field" style="margin-top:14px;">
-          <span class="field-label">Términos y Condiciones</span>
-          <textarea id="config-terminos" rows="3" placeholder="Texto que ve el usuario al aceptar términos"></textarea>
-        </label>
-      </div>
+<span class="field-label">Términos y Condiciones</span>
+           <textarea id="config-terminos" rows="3" placeholder="Texto que ve el usuario al aceptar términos"></textarea>
+         </label>
 
-      <!-- Card Admin: cambiar usuario y contraseña -->
+         <!-- Card: Gestión de Categorías -->
+         <div class="card" style="margin-top: 16px;">
+           <h2 class="card-title">Gestión de Categorías</h2>
+           <p class="field-help">Las categorías aquí definidas aparecerán en el filtro de la tienda.</p>
+           <div class="form-grid" style="gap: 12px;">
+             <label class="field">
+               <span class="field-label">Nueva Categoría</span>
+               <input type="text" id="nueva-categoria" placeholder="Ej: Camisas, Pantalones, etc.">
+             </label>
+             <button id="btn-agregar-categoria" class="btn btn-primary" type="button" onclick="agregarCategoria()">Añadir Categoría</button>
+           </div>
+           <div id="lista-categorias" style="margin-top: 12px; max-height: 150px; overflow-y: auto; border: 1px solid #E8E0E6; border-radius: 8px; padding: 8px;">
+             <p style="color:#7A7079; font-size:12px;">Cargando categorías...</p>
+           </div>
+         </div>
+
+         <!-- Card Admin: cambiar usuario y contraseña -->
       <div class="card">
         <h2 class="card-title">Acceso de Administrador</h2>
         <label class="field">

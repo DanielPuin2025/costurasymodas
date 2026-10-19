@@ -174,7 +174,8 @@ VALUES (
     ('terminosCondiciones', 'Solo 2 métodos de pago: 1) Cliente paga y va al local (retira en el taller), 2) Contraentrega por Nequi con anticipo 40.000 COP vía Nequi. Si no estás en el lugar a la hora acordada y no avisaste, se retiene el anticipo. Tiempo de espera de solicitudes: 1 a 2 semanas, pasado ese tiempo se liberan.'),
     ('logo', ''),
     ('adminUsuario', 'DSBJ'),
-    ('adminPassword', 'DSBJ24032009');
+    ('adminPassword', 'DSBJ24032009'),
+    ('categoriasProductos', '["Camisas","Pantalones","Chaquetas","Uniformes","Overoles","Ofertas","General"]');
 
 -- Producto de ejemplo
 INSERT INTO

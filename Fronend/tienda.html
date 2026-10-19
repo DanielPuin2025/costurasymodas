@@ -35,7 +35,7 @@
 
             <div class="header-title">
                 <h1>Costuras & Modas</h1>
-                <span>Colección 2026</span>
+                <button class="creadores-link" id="btnColeccion" onclick="abrirCreadores()" title="Ver creadores">Colección 2026</button>
             </div>
 
             <div class="header-icons-right">
@@ -73,60 +73,34 @@
         </div>
     </header>
 
-    <!-- ====== DISPONIBILIDAD / HORARIO: muestra si la tienda está Abierta/Cerrada en vivo ====== -->
-    <div id="disponibilidadBanner" class="disponibilidad-banner" hidden>
-        <!-- se llena por JS: Abierto / Cerrado + horario + WhatsApp -->
-    </div>
-
-    <!-- ====== CATEGORÍAS: filtros por tipo de prenda ====== -->
-    <div class="categories">
-        <div class="categories-inner">
-            <button class="cat-pill active" onclick="filterCat(this, 'todos')">Todos</button>
-            <button class="cat-pill" onclick="filterCat(this, 'Camisas')">👕 Camisas</button>
-            <button class="cat-pill" onclick="filterCat(this, 'Pantalones')">👖 Pantalones</button>
-            <button class="cat-pill" onclick="filterCat(this, 'Chaquetas')">🧥 Chaquetas</button>
-            <button class="cat-pill" onclick="filterCat(this, 'Uniformes')">👔 Uniformes</button>
-            <button class="cat-pill" onclick="filterCat(this, 'Overoles')">🦺 Overoles</button>
-            <button class="cat-pill" onclick="filterCat(this, 'Ofertas')">🔥 Ofertas</button>
+<!-- ====== CATEGORÍA: selector desplegable ====== -->
+    <div class="categories" id="categoriaFiltro" style="padding: 6px 0; margin: 8px 0;">
+        <div class="categories-inner" style="display: flex; align-items: center; gap: 10px; max-width: 1200px; margin: 0 auto;">
+            <label for="selectCategoria" class="categoria-label">Categoría</label>
+            <select id="selectCategoria" class="categoria-select" onchange="filtrarPorCategoriaSelect(this.value)">
+                <option value="todos">Todas las categorías</option>
+            </select>
         </div>
     </div>
 
-    <!-- ====== COLORES: filtros por color (dinámico, como el de categoría) ====== -->
+    <!-- ====== COLORES: oculto en tienda, solo en detalle producto ====== -->
     <div class="categories" id="colorFilterRow" hidden>
         <div class="categories-inner" id="colorPillsInner">
             <!-- Los pills de color los genera JS según los productos cargados -->
         </div>
     </div>
 
-    <!-- ====== HERO: banner principal con eslogan e invitación a explorar ====== -->
-    <div class="hero" id="inicio">
-        <div class="hero-card">
-            <div class="hero-text">
-                <span class="tag">Nueva Colección</span>
-                <h2>Elegancia<br><em>hecha a mano</em></h2>
-                <p>Descubre piezas únicas confeccionadas con amor y detalle. Moda que cuenta tu historia.</p>
-                <button class="hero-btn">
-                    Explorar ahora
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                    </svg>
-                </button>
-            </div>
-            <div class="hero-emoji">👗</div>
-        </div>
     </div>
 
     <!-- ====== PRODUCTOS: grilla que JS rellena con los productos disponibles ====== -->
     <div class="products-section" id="productos-section">
         <div class="section-top">
             <h3>Productos destacados</h3>
-            <select class="sort-select">
-                <option>Más populares</option>
-                <option>Precio: menor a mayor</option>
-                <option>Precio: mayor a menor</option>
-                <option>Más nuevos</option>
+            <select class="sort-select" onchange="cambiarOrden(this.value)">
+                <option value="populares">Más populares</option>
+                <option value="precio_asc">Precio: menor a mayor</option>
+                <option value="precio_desc">Precio: mayor a menor</option>
+                <option value="nuevos">Más nuevos</option>
             </select>
         </div>
 
@@ -171,15 +145,6 @@
             <button type="button" class="menu-logout-btn" id="btnMisSolicitudes" style="margin-bottom:12px;background:linear-gradient(135deg,#f0567a,#c084fc);color:white;border:none;">
                  📋 Mis solicitudes
             </button>
-            <!-- Info del taller en el menú, no en footer -->
-            <div style="background:#FBF7F9;border:1px solid #E8E0E6;border-radius:12px;padding:12px;margin-bottom:12px;">
-                <strong style="color:#7B2D5E;">🏠 Taller Costuras y Modas</strong><br>
-                <small style="color:#7A7079;">📞 <span id="tallerTelefoMenu">—</span><br>
-                🕒 <span id="tallerHorarioMenu">Lunes a Sábado 08:00-18:00</span><br>
-                ⏳ Espera: <span id="tallerEsperaMenu">10 días</span><br>
-                💳 Nequi: <span id="nequiMenu">—</span> (anticipo 40.000 COP)</small>
-            </div>
-            <a id="tallerWhatsAppMenu" href="#" target="_blank" style="display:none;background:#25D366;color:white;padding:10px 14px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;text-align:center;margin-bottom:12px;">💬 WhatsApp del taller</a>
             <button type="button" class="menu-logout-btn" id="btnCerrarSesionMenu">
                  📴 Cerrar sesión
             </button>
@@ -199,7 +164,7 @@
         </div>
     </div>
 
-    <!-- ====== LOGIN ELECCIÓN (MercadoLibre): se abre al dar Solicitar sin sesión + botón admin oculto (FIX: ahora sí lleva a admin) ====== -->
+    <!-- ====== LOGIN ELECCIÓN : se abre al dar Solicitar sin sesión + botón admin oculto (FIX: ahora sí lleva a admin) ====== -->
     <div class="modal-overlay" id="loginChoiceModal" hidden onclick="if(event.target===this) cerrarLoginChoice()">
         <div class="modal-box" style="max-width:400px;position:relative;">
             <!-- Botón admin oculto: FIX tamaño/opacity y navegación robusta (evita "lleva a nada") -->
@@ -209,8 +174,8 @@
                 <button class="modal-close" onclick="cerrarLoginChoice()">&times;</button>
             </div>
             <div style="padding:16px;">
-                <p style="font-size:13px;color:#7A7079;margin-bottom:12px;">Como en Mercado Libre: si ya tienes cuenta inicia sesión, si no regístrate. Tu carrito se guarda.</p>
-                <input type="email" id="loginChoiceEmail" placeholder="E-mail o teléfono" style="width:100%;padding:10px 12px;border:1.5px solid #E8E0E6;border-radius:10px;margin-bottom:10px;">
+                <p style="font-size:13px;color:#7A7079;margin-bottom:12px;"> Si ya tienes cuenta inicia sesión, si no  te regístras. Tu carrito se guarda.</p>
+                <input type="email" id="loginChoiceEmail" placeholder="E-mail" style="width:100%;padding:10px 12px;border:1.5px solid #E8E0E6;border-radius:10px;margin-bottom:10px;">
                 <button class="btn btn-primary btn-block" onclick="continuarLoginChoice()">Continuar</button>
                 <div style="text-align:center;margin:10px 0;">
                     <a href="costuras_y_modas.html#usuario" style="color:#D9488F;font-size:13px;font-weight:600;text-decoration:none;">Crear cuenta</a>
@@ -298,24 +263,27 @@
                     <div class="form-group" style="grid-column:1/-1;">
                         <label for="checkoutMetodoPago">Método de pago *</label>
                         <select id="checkoutMetodoPago" required>
-                            <option value="taller_fisico">Cliente paga y va al local — Pago en taller / Retiro</option>
                             <option value="contraentrega">Contraentrega por Nequi — Anticipo 40.000 COP</option>
+                            <option value="recoger_taller">Recoger y pagar en el Taller</option>
                         </select>
                         <small id="checkoutPagoHelp" style="font-size:11px;color:#7A7079;margin-top:4px;display:block;"></small>
                     </div>
                 </div>
-                <!-- Anticipo Contraentrega por Nequi info (40k) -->
-                <div id="nequiInfoBox" hidden style="background:#fef9e7;border:1px solid #fcd34d;border-radius:10px;padding:10px;margin-top:10px;font-size:12px;">
-                    <strong>Contraentrega por Nequi — Anticipo 40.000 COP</strong>
-                    <div>Nequi: <span id="nequiNumeroDisplay">—</span></div>
-                    <small>Anticipo vía Nequi. Si no estás en el lugar a la hora acordada sin avisar, se retiene el anticipo por tiempo perdido.</small>
-                </div>
-                <!-- Taller info -->
-                <div id="tallerInfoBox" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px;margin-top:10px;font-size:12px;display:flex;gap:10px;align-items:center;">
-                    <img id="tallerFotoDisplay" src="" alt="Taller" style="width:60px;height:60px;object-fit:cover;border-radius:8px;display:none;">
-                    <div>
-                        <strong>📍 Taller: <span id="tallerDireccionDisplay">—</span></strong><br>
-                        <small>📞 <span id="tallerTelefonoDisplay">—</span> • ⏳ Espera: <span id="tallerEsperaDisplay">1-2 semanas</span></small>
+                <!-- Campos solo para Recoger en Taller -->
+                <div id="recogeTallerCampos" style="grid-column:1/-1;display:none;background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:12px;margin-top:10px;">
+                    <div class="form-grid" style="margin-bottom:8px;">
+                        <div class="form-group">
+                            <label for="checkoutNombreRecoge">Nombre de quien recoge *</label>
+                            <input type="text" id="checkoutNombreRecoge" placeholder="Ej: Juan Pérez">
+                        </div>
+                        <div class="form-group">
+                            <label for="checkoutTelefonoRecoge">Número de contacto *</label>
+                            <input type="tel" id="checkoutTelefonoRecoge" placeholder="300 123 4567">
+                        </div>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label for="checkoutFechaRecoge">Fecha estimada de recogida * (máximo 10 días desde hoy)</label>
+                        <input type="date" id="checkoutFechaRecoge">
                     </div>
                 </div>
                 <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:12px;">
@@ -400,8 +368,49 @@
             if(btn) btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href='costuras_y_modas.html#admin'; });
         })();
     </script>
+    <!-- MODAL CREADORES -->
+    <div id="creadoresOverlay" class="recuperar-overlay" hidden>
+        <div class="recuperar-modal" style="max-width:440px;">
+            <button class="recuperar-close" onclick="cerrarCreadores()" aria-label="Cerrar">&times;</button>
+            <h3>Creadores</h3>
+            <p class="recuperar-help">Las personas detrás de Costuras & Modas</p>
+            <div id="creadoresLista" style="display:none;flex-direction:column;gap:12px;margin-top:12px;"></div>
+            <button type="button" id="btnVerCreadores" class="btn-submit" style="margin-top:14px;" onclick="verCreadores()">Ver</button>
+        </div>
+    </div>
+
     <!-- Lógica de la tienda: filtros, carrito, solicitudes y disponibilidad -->
     <script src="tienda.js"></script>
+    <script>
+        const CREADORES = [
+            { nombre: 'Daniel Bejarano', foto: 'creador1.jpg', rol: 'Desarrollador' },
+            { nombre: 'Juan Bermudez', foto: 'creador2.jpg', rol: 'Desarrollador' },
+            { nombre: 'Omar Vargas', foto: 'creador3.jpg', rol: 'Desarrollador' }
+        ];
+        window.abrirCreadores = function() {
+            const lista = document.getElementById('creadoresLista');
+            if (lista) { lista.style.display = 'none'; lista.innerHTML = ''; }
+            const btn = document.getElementById('btnVerCreadores');
+            if (btn) btn.style.display = 'block';
+            document.getElementById('creadoresOverlay').hidden = false;
+        };
+        window.verCreadores = function() {
+            const lista = document.getElementById('creadoresLista');
+            if (!lista) return;
+            lista.innerHTML = CREADORES.map(c =>
+                '<div style="display:flex;align-items:center;gap:12px;background:#FBF7F9;border:1px solid #E8E0E6;border-radius:12px;padding:10px 12px;">' +
+                    '<img src="' + c.foto + '" alt="' + c.nombre + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="width:52px;height:52px;border-radius:50%;object-fit:cover;">' +
+                    '<div class="avatar-inicial" style="display:none;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#f0567a,#c084fc);color:white;align-items:center;justify-content:center;font-weight:700;font-size:20px;">' + c.nombre.charAt(0) + '</div>' +
+                    '<div><strong style="color:#1a0a14;">' + c.nombre + '</strong><br><small style="color:#9b7b8a;">' + c.rol + '</small></div>' +
+                '</div>'
+            ).join('');
+            lista.style.display = 'flex';
+            const btn = document.getElementById('btnVerCreadores');
+            if (btn) btn.style.display = 'none';
+        };
+        window.cerrarCreadores = function() { document.getElementById('creadoresOverlay').hidden = true; };
+        document.getElementById('creadoresOverlay').addEventListener('click', function(e){ if(e.target===this) cerrarCreadores(); });
+    </script>
 </body>
 
 </html>

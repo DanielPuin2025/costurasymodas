@@ -13,6 +13,8 @@
         #loginHeader img{ width:34px; height:34px; object-fit:cover; border-radius:8px; background:white; display:none; }
         #mainContainer{ margin-top:62px !important; }
         .admin-oculto{ position:absolute; width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.05); border:none; cursor:pointer; opacity:0.06; }
+        .creadores-links{ display:flex; justify-content:center; gap:18px; flex-wrap:wrap; margin-top:6px; }
+        .creadores-links .go-link{ color:#ffee00; }
     </style>
 </head>
 <body>
@@ -54,6 +56,9 @@
                     </p>
                     <p>¿No tienes cuenta?
                         <span id="goSignup" class="go-link">Regístrate</span>
+                    </p>
+                    <p style="margin-top:4px;">
+                        <span class="go-link" onclick="abrirCreadores()">Creadores</span>
                     </p>
                 </div>
 
@@ -225,6 +230,48 @@
             handleHash();
             window.addEventListener('hashchange', handleHash);
         })();
+    </script>
+
+    <!-- MODAL CREADORES -->
+    <div id="creadoresOverlay" class="recuperar-overlay" hidden>
+        <div class="recuperar-modal" style="max-width:440px;">
+            <button class="recuperar-close" onclick="cerrarCreadores()" aria-label="Cerrar">&times;</button>
+            <h3>Creadores</h3>
+            <p class="recuperar-help">Las personas detrás de Costuras & Modas</p>
+            <div id="creadoresLista" style="display:none;flex-direction:column;gap:12px;margin-top:12px;"></div>
+            <button type="button" id="btnVerCreadores" class="btn-submit" style="margin-top:14px;" onclick="verCreadores()">Ver</button>
+        </div>
+    </div>
+
+    <script>
+        const CREADORES = [
+            { nombre: 'Daniel Bejarano', foto: 'creador1.jpg', rol: 'Desarrollador' },
+            { nombre: 'Juan Bermudez', foto: 'creador2.jpg', rol: 'Desarrollador' },
+            { nombre: 'Omar Vargas', foto: 'creador3.jpg', rol: 'Desarrollador' }
+        ];
+        window.abrirCreadores = function() {
+            const lista = document.getElementById('creadoresLista');
+            if (lista) { lista.style.display = 'none'; lista.innerHTML = ''; }
+            const btn = document.getElementById('btnVerCreadores');
+            if (btn) btn.style.display = 'block';
+            document.getElementById('creadoresOverlay').hidden = false;
+        };
+        window.verCreadores = function() {
+            const lista = document.getElementById('creadoresLista');
+            if (!lista) return;
+            lista.innerHTML = CREADORES.map(c =>
+                '<div style="display:flex;align-items:center;gap:12px;background:#FBF7F9;border:1px solid #E8E0E6;border-radius:12px;padding:10px 12px;">' +
+                    '<img src="' + c.foto + '" alt="' + c.nombre + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="width:52px;height:52px;border-radius:50%;object-fit:cover;">' +
+                    '<div class="avatar-inicial" style="display:none;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#f0567a,#c084fc);color:white;align-items:center;justify-content:center;font-weight:700;font-size:20px;">' + c.nombre.charAt(0) + '</div>' +
+                    '<div><strong style="color:#1a0a14;">' + c.nombre + '</strong><br><small style="color:#9b7b8a;">' + c.rol + '</small></div>' +
+                '</div>'
+            ).join('');
+            lista.style.display = 'flex';
+            const btn = document.getElementById('btnVerCreadores');
+            if (btn) btn.style.display = 'none';
+        };
+        window.cerrarCreadores = function() { document.getElementById('creadoresOverlay').hidden = true; };
+        document.getElementById('creadoresOverlay').addEventListener('click', function(e){ if(e.target===this) cerrarCreadores(); });
     </script>
 </body>
 </html>

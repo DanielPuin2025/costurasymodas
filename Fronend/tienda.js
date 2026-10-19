@@ -71,48 +71,11 @@
   };
   function mostrarErrorConexion(err){ console.error(err); showToast('⚠️ '+(err.message||'Error de conexión.')); }
 
-  // ---------- Carga config tienda + disponibilidad en vivo ----------
-  function horarioAMinutos(h){ // Convierte "HH:MM" a minutos totales
- const p=(h||'00:00').split(':'); return parseInt(p[0]||0)*60+parseInt(p[1]||0); }
-  function estaAbiertoPorHorario(){ // True si hora actual está dentro de apertura-cierre
-    if(String(configTienda.tiendaDisponible)==='0') return false;
-    try{
-      const ahora=new Date();
-      const mins=ahora.getHours()*60+ahora.getMinutes();
-      const ap=horarioAMinutos(configTienda.horarioApertura);
-      const ci=horarioAMinutos(configTienda.horarioCierre);
-      if(ap===ci) return true; // 24h
-      if(ap < ci) return mins >= ap && mins < ci;
-      // rango nocturno ej 22:00-06:00
-      return mins >= ap || mins < ci;
-    }catch(e){ return true; }
-  }
-  function renderDisponibilidad(){ // Pinta banner Abierto/Cerrado según horario y switch
-    const banner=document.getElementById('disponibilidadBanner');
-    if(!banner) return;
-    banner.hidden=false;
-    const abierto=estaAbiertoPorHorario(); // Calcula si está abierto ahora
-    const dias=escapeHtml(configTienda.horarioDias||'');
-    const ap=escapeHtml(configTienda.horarioApertura||'');
-    const ci=escapeHtml(configTienda.horarioCierre||'');
-    const wa=(configTienda.whatsapp||'').replace(/[^0-9]/g,'');
-    const waLink=wa? 'https://wa.me/'+wa : '';
-    if(String(configTienda.tiendaDisponible)==='0'){
-      banner.className='disponibilidad-banner cerrado';
-      banner.innerHTML='🔴 <strong>Tienda cerrada por el momento</strong> · '+(dias? dias+' · ':'')+ ap + ' - ' + ci + (waLink? ' · <a href="'+waLink+'" target="_blank" style="color:inherit;text-decoration:underline;">WhatsApp admin</a>' : '');
-    } else if(abierto){
-      banner.className='disponibilidad-banner abierto';
-      banner.innerHTML='🟢 <strong>¡Estamos disponibles ahora!</strong> · '+(dias? dias+' · ':'')+ ap + ' - ' + ci + (waLink? ' · <a href="'+waLink+'" target="_blank" style="color:inherit;text-decoration:underline;">Escríbenos</a>' : '');
-    } else {
-      banner.className='disponibilidad-banner cerrado';
-      banner.innerHTML='🟠 <strong>Cerrado ahora</strong> · Horario: '+(dias? dias+' ':'')+ ap + ' - ' + ci + ' · Volvemos pronto' + (waLink? ' · <a href="'+waLink+'" target="_blank" style="color:inherit;text-decoration:underline;">Deja mensaje</a>' : '');
-    }
-  }
+  // ---------- Carga config tienda ----------
   async function cargarConfigTienda(){ // Trae WhatsApp, horario, taller, nequi y terminos
     try{
       const c=await apiGet('configuracion.php');
       configTienda.whatsapp=c.whatsapp||'';
-      configTienda.tiendaDisponible=c.tiendaDisponible||c.tienda_disponible||'1';
       configTienda.horarioApertura=c.horarioApertura||c.horario_apertura||'08:00';
       configTienda.horarioCierre=c.horarioCierre||c.horario_cierre||'18:00';
       configTienda.horarioDias=c.horarioDias||c.horario_dias||'Lunes a Sábado';
@@ -123,10 +86,9 @@
       configTienda.anticipoValor=c.anticipoValor||c.anticipo_valor||'40000';
       configTienda.tiempoEsperaDias=c.tiempoEsperaDias||c.tiempo_espera_dias||'10';
       configTienda.terminos=c.terminosCondiciones||c.terminos_condiciones||c.terminos||'';
+      configTienda.categorias = c.categoriasProductos || c.categorias || [];
       configTienda.nombreEmpresa=c.nombreEmpresa||'Costuras y Modas';
       configTienda.logo=c.logo||'';
-      renderDisponibilidad();
-      setInterval(renderDisponibilidad, 60000);
       if(c.nombreEmpresa){
         const h1=document.querySelector('.header-title h1');
         if(h1) h1.textContent=c.nombreEmpresa;
@@ -141,48 +103,26 @@
         let fav2=document.querySelector('link[rel="shortcut icon"]');
         if(fav2) fav2.href=fav.href;
       }catch(e){}
-      // Pobla menú taller y cajas checkout
-      const setText=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt||'—'; };
-      const setImg=(id,src)=>{ const el=document.getElementById(id); if(!el) return; if(src){ el.src=src; el.style.display='block'; } else el.style.display='none'; };
-      setText('tallerDireccionDisplay', configTienda.direccionTaller);
-      setText('tallerTelefonoDisplay', configTienda.telefonoTaller||configTienda.whatsapp);
-      setText('tallerEsperaDisplay', configTienda.tiempoEsperaDias+' días');
-      setText('tallerTelefoMenu', configTienda.telefonoTaller||configTienda.whatsapp);
-      setText('tallerHorarioMenu', configTienda.horarioDias+' '+configTienda.horarioApertura+'-'+configTienda.horarioCierre);
-      setText('tallerEsperaMenu', configTienda.tiempoEsperaDias+' días');
-      setText('nequiMenu', configTienda.nequi||'No configurado');
-      setText('nequiNumeroDisplay', configTienda.nequi||'No configurado');
-      setText('nequiFooter', configTienda.nequi||'—');
-      setImg('tallerFotoDisplay', configTienda.fotoTaller);
-      const waMenu=document.getElementById('tallerWhatsFooter');
-      // WhatsApp visible solo en menú si existe
-      const wa=(configTienda.whatsapp||'').replace(/\D/g,'');
-      if(wa){
-        try{
-          let l=document.getElementById('tallerWhatsFooter'); if(l){l.href='https://wa.me/'+wa;l.style.display='inline-flex';}
-          let lm=document.getElementById('tallerWhatsAppMenu'); if(lm){lm.href='https://wa.me/'+wa;lm.style.display='inline';}
-        }catch(e){}
-      }
       const termTienda=document.getElementById('terminosTextoTienda');
       if(termTienda) termTienda.textContent=configTienda.terminos||'';
       // metodo pago help
       actualizarPagoHelp();
+      poblarSelectCategorias();
     }catch(e){ console.error(e); }
   }
-  function actualizarPagoHelp(){ // Solo 2 métodos: pago en local y contraentrega por Nequi
+  function actualizarPagoHelp(){
     const sel=document.getElementById('checkoutMetodoPago');
     const help=document.getElementById('checkoutPagoHelp');
-    const nequiBox=document.getElementById('nequiInfoBox');
     if(!sel) return;
     const val=sel.value;
+    const recogeCampos=document.getElementById('recogeTallerCampos');
+    if(recogeCampos) recogeCampos.style.display = (val==='recoger_taller')?'block':'none';
     if(help){
       if(val==='contraentrega') help.textContent='Contraentrega por Nequi: pagarás '+formatPrecio(configTienda.anticipoValor)+' como anticipo vía Nequi ('+(configTienda.nequi||'—')+'). El resto al recibir.';
-      else if(val==='taller_fisico') help.textContent='Cliente paga y va al local: pagas en físico en '+(configTienda.direccionTaller||'el taller')+' y retiras. Llega a la hora acordada.';
+      else if(val==='recoger_taller') help.textContent='Recoger y pagar en el Taller: indica quién irá a recoger, su número y la fecha estimada (máximo 10 días desde hoy).';
     }
-    if(nequiBox) nequiBox.hidden = (val!=='contraentrega');
-    const tallerBox=document.getElementById('tallerInfoBox');
-    if(tallerBox) tallerBox.style.display = (val==='taller_fisico'?'flex':'flex'); // siempre visible
   }
+  document.getElementById('checkoutMetodoPago')?.addEventListener('change', actualizarPagoHelp);
 
   // ---------- Productos ----------
   const productsGrid=document.getElementById('productsGrid'); // Contenedor de cards
@@ -200,8 +140,24 @@
     if(stock<=10) return '<span class="stock-badge low-stock">¡Últimas '+stock+'!</span>';
     return '<span class="stock-badge in-stock">Disponible ('+stock+')</span>';
   }
+  let ordenActual = 'populares';
+
+  function ordenarProductos(lista) {
+    const arr = [...lista];
+    if (ordenActual === 'precio_asc') arr.sort((a,b) => (Number(a.precio)||0) - (Number(b.precio)||0));
+    else if (ordenActual === 'precio_desc') arr.sort((a,b) => (Number(b.precio)||0) - (Number(a.precio)||0));
+    else if (ordenActual === 'nuevos') arr.sort((a,b) => new Date(b.creado_en||0) - new Date(a.creado_en||0));
+    else arr.sort((a,b) => (b.stock||0) - (a.stock||0));
+    return arr;
+  }
+
+  window.cambiarOrden = function(valor) {
+    ordenActual = valor;
+    renderProductos();
+  };
+
   function renderProductos(){
-    const lista=productosFiltrados();
+    const lista=ordenarProductos(productosFiltrados());
     const totalPaginas=Math.ceil(lista.length/PRODUCTOS_POR_PAGINA)||1;
     if(paginaActual>totalPaginas) paginaActual=totalPaginas;
     const inicio=(paginaActual-1)*PRODUCTOS_POR_PAGINA;
@@ -219,14 +175,13 @@
       return (
         '<div class="product-card" style="cursor:pointer;" onclick="abrirDetalleProducto(\''+p.id+'\')">'+
         '<div class="card-img">'+imagen+
-        '<button class="card-wish" title="Favorito" onclick="event.stopPropagation(); showToast(\'💕 Añadido a favoritos\')">🤍</button>'+
         '</div>'+
         '<div class="card-body">'+
         '<div class="card-cat">'+escapeHtml(p.categoria||'General')+(p.color?' · '+escapeHtml(p.color):'')+'</div>'+
         '<div class="card-name">'+escapeHtml(p.nombre)+'</div>'+
         stockBadge(p.stock)+
         '<div class="card-footer" style="margin-top:8px;">'+
-        '<div class="card-price"><span class="price-main">'+formatPrecio(p.precio)+'</span></div>'+
+        '<div class="card-price"><span class="price-main">'+formatPrecio(p.precio)+'</span>'+((p.tallas||'').trim()?'<span class="price-old" style="display:block;font-size:11px;color:#9b7b8a;text-decoration:none;">Talla: '+escapeHtml(p.tallas)+'</span>':'')+'</div>'+
         '<button class="add-cart-btn" title="Solicitar este producto" onclick="event.stopPropagation(); agregarAlCarrito(\''+p.id+'\')">'+
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'+
         '</button>'+
@@ -246,28 +201,46 @@
     }catch(err){ mostrarErrorConexion(err); }
   }
 
-  window.filterCat=function(el,cat){
-    categoriaActiva=cat;
-    document.querySelectorAll('.categories:not(#colorFilterRow) .cat-pill').forEach((btn)=>btn.classList.toggle('active',btn===el));
+  window.filtrarPorCategoriaSelect = function(categoria) {
+    categoriaActiva = categoria;
     renderProductos();
   };
 
-  // ---------- Filtro de colores (dinámico, como el de categoría) ----------
-  function renderColorPills(){ // Genera pills de color según los productos existentes
-    const row=document.getElementById('colorFilterRow');
-    const wrap=document.getElementById('colorPillsInner');
-    if(!row||!wrap) return;
-    const colores=[...new Set(productos.map((p)=>(p.color||'').trim()).filter(Boolean))];
-    if(!colores.length){ row.hidden=true; wrap.innerHTML=''; colorActiva='todos'; return; }
-    if(colorActiva!=='todos' && !colores.includes(colorActiva)) colorActiva='todos';
-    row.hidden=false;
-    let html='<span class="color-filter-label">🎨 Color:</span>';
-    html+='<button class="cat-pill'+(colorActiva==='todos'?' active':'')+'" onclick="filterColor(this,\'todos\')">Todos</button>';
-    colores.forEach((c)=>{
-      const esc=c.replace(/'/g,"\\'");
-      html+='<button class="cat-pill'+(colorActiva===c?' active':'')+'" onclick="filterColor(this,\''+esc+'\')">'+escapeHtml(c)+'</button>';
+  const CATEGORIAS_DEFAULT = ['Camisas', 'Pantalones', 'Chaquetas', 'Uniformes', 'Overoles', 'Ofertas', 'General'];
+
+  function obtenerCategoriasTienda() {
+    let cats = configTienda.categorias || [];
+    if (typeof cats === 'string') {
+      try { cats = JSON.parse(cats); } catch(e) { cats = []; }
+    }
+    if (!Array.isArray(cats)) cats = [];
+    const todas = [...CATEGORIAS_DEFAULT];
+    cats.forEach((cat) => {
+      if (!todas.some((c) => c.toLowerCase() === cat.toLowerCase())) todas.push(cat);
     });
-    wrap.innerHTML=html;
+    return todas;
+  }
+
+  function poblarSelectCategorias() {
+    const select = document.getElementById('selectCategoria');
+    if (!select) return;
+    const todas = obtenerCategoriasTienda();
+    let html = '<option value="todos">Todas las categorías</option>';
+    todas.forEach((cat) => {
+      html += '<option value="' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</option>';
+    });
+    select.innerHTML = html;
+  }
+
+  // Actualizar renderProductos para usar categoriaActiva
+  // ... (la lógica ya usa categoriaActiva global)
+
+  // ---------- Filtro de colores (solo en detalle producto, NO en tienda) ----------
+  // Ya no mostramos pills de color en la tienda principal.
+  // Los colores se muestran dentro del panel de detalle del producto.
+  function renderColorPills(){ // Sin-op: mantiene row hidden en tienda
+    const row=document.getElementById('colorFilterRow');
+    if(row) row.hidden=true;
   }
   window.filterColor=function(el,color){
     colorActiva=color;
@@ -308,18 +281,6 @@
       html+='<button class="page-btn nav" style="display:none;">Última →</button>';
     }
     wrap.innerHTML=html;
-    // Mostrar info taller en menú
-    const tMenu=document.getElementById('tallerTelefoMenu');
-    if(tMenu) tMenu.textContent=configTienda.telefonoTaller||configTienda.whatsapp||'—';
-    const hMenu=document.getElementById('tallerHorarioMenu');
-    if(hMenu) hMenu.textContent=configTienda.horarioDias+' '+configTienda.horarioApertura+'-'+configTienda.horarioCierre;
-    const eMenu=document.getElementById('tallerEsperaMenu');
-    if(eMenu) eMenu.textContent=configTienda.tiempoEsperaDias+' días';
-    const nMenu=document.getElementById('nequiMenu');
-    if(nMenu) nMenu.textContent=configTienda.nequi||'No configurado';
-    const wm=document.getElementById('tallerWhatsAppMenu');
-    const wa=(configTienda.whatsapp||'').replace(/\D/g,'');
-    if(wa&&wm){ wm.href='https://wa.me/'+wa; wm.style.display='block'; } else if(wm){ wm.style.display='none'; }
   }
 
   // ---------- Carrito ----------
@@ -340,23 +301,36 @@
     cartBody.innerHTML=carrito.map((item)=>{
       const imagen=item.imagen?'<img src="'+item.imagen+'" alt="'+escapeHtml(item.nombre)+'">':emojiProducto(item.categoria);
       return (
-        '<div class="cart-item"><div class="cart-item-img">'+imagen+'</div><div class="cart-item-info"><div class="cart-item-name">'+escapeHtml(item.nombre)+(item.color?' <small style="color:#9b7b8a;">· '+escapeHtml(item.color)+'</small>':'')+'</div><div class="cart-item-price">'+formatPrecio(item.precio)+'</div><div class="cart-item-qty"><button class="qty-btn" onclick="cambiarCantidad(\''+item.id+'\', -1)">−</button><span>'+item.cantidad+'</span><button class="qty-btn" onclick="cambiarCantidad(\''+item.id+'\', 1)">+</button><button class="cart-item-remove" onclick="quitarDelCarrito(\''+item.id+'\')">Quitar</button></div></div></div>'
+        '<div class="cart-item"><div class="cart-item-img">'+imagen+'</div><div class="cart-item-info"><div class="cart-item-name">'+escapeHtml(item.nombre)+(item.talla?' <small style="color:#9b7b8a;">· Talla '+escapeHtml(item.talla)+'</small>':'')+(item.color?' <small style="color:#9b7b8a;">· '+escapeHtml(item.color)+'</small>':'')+'</div><div class="cart-item-price">'+formatPrecio(item.precio)+'</div><div class="cart-item-qty"><button class="qty-btn" onclick="cambiarCantidad(\''+item.id+'\', -1)">−</button><span>'+item.cantidad+'</span><button class="qty-btn" onclick="cambiarCantidad(\''+item.id+'\', 1)">+</button><button class="cart-item-remove" onclick="quitarDelCarrito(\''+item.id+'\')">Quitar</button></div></div></div>'
       );
     }).join('');
     const total=carrito.reduce((sum,item)=>sum+item.precio*item.cantidad,0);
     cartTotal.textContent=formatPrecio(total); actualizarBadge();
   }
-  window.agregarAlCarrito=function(productoId){ // FIX: todos los productos se pueden solicitar (sin bloqueo por stock)
+window.agregarAlCarrito=function(productoId){
     const producto=productos.find((p)=>String(p.id)===String(productoId)); if(!producto) return;
     if(!producto.disponible || Number(producto.disponible)===0){ showToast('😕 Producto no disponible por el momento'); return; }
-    const existente=carrito.find((item)=>String(item.id)===String(producto.id));
+    const tallasRaw=(producto.tallas||'').trim();
+    const tallasList=tallasRaw ? tallasRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+    // Si tiene tallas y ninguna seleccionada: abrir detalle y mostrar alerta encima
+    if(tallasList.length>0){
+      productoDetalleActual=producto;
+      detalleCantidad=1;
+      tallaSeleccionada='';
+      renderDetalleProducto();
+      mostrarAlertaTallaDetalle('⚠️ Selecciona una talla antes de solicitar este producto.');
+      if(productDetailOverlay) productDetailOverlay.classList.add('show');
+      if(productDetailPanel) productDetailPanel.classList.add('show');
+      return;
+    }
+    const existente=carrito.find((item)=>String(item.id)===String(producto.id) && item.talla===tallaSeleccionada);
     if(existente) existente.cantidad+=1;
-    else carrito.push({id:producto.id,nombre:producto.nombre,precio:Number(producto.precio)||0,categoria:producto.categoria,color:producto.color||'',imagen:producto.imagen||'',cantidad:1});
+    else carrito.push({id:producto.id,nombre:producto.nombre,precio:Number(producto.precio)||0,categoria:producto.categoria,color:producto.color||'',imagen:producto.imagen||'',talla:tallaSeleccionada,cantidad:1});
     persistCarrito(); renderCarrito();
-    showToast('🛒 "'+producto.nombre+'" añadido — puedes solicitarlo');
-    // Abre apartado de solicitudes (carrito) automáticamente
+    showToast('🛒 "'+producto.nombre+'" x1 añadido');
     openCart();
-  };
+};
+
   window.cambiarCantidad=function(productoId,delta){
     const item=carrito.find((i)=>String(i.id)===String(productoId)); if(!item) return;
     item.cantidad+=delta;
@@ -375,6 +349,7 @@
   const detailProductName=document.getElementById('detailProductName');
   let productoDetalleActual=null;
   let detalleCantidad=1;
+  let tallaSeleccionada='';
 
   function renderDetalleProducto(){
     const p=productoDetalleActual;
@@ -384,28 +359,15 @@
     const imagen=p.imagen
       ? '<img src="'+p.imagen+'" alt="'+escapeHtml(p.nombre)+'">'
       : '<span class="emoji-large">'+emojiProducto(p.categoria)+'</span>';
-    const tallas=(p.tallas||'').trim() || 'No especificado';
+    const tallasRaw=(p.tallas||'').trim();
+    const tallasList=tallasRaw ? tallasRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+    const tallas = tallasRaw || 'No especificado';
+    if(tallaSeleccionada && !tallasList.includes(tallaSeleccionada)) tallaSeleccionada='';
     const material=(p.material||'').trim() || 'No especificado';
     const descripcion=(p.descripcion||'').trim() || 'Sin descripción disponible.';
     const stockNum=Number(p.stock)||0;
     const stockTxt=stockNum<=0 ? 'Sobre pedido • Disponible' : (stockNum+' unidades disponibles');
-    // Datos del taller: solo si el usuario ya está registrado (sesión activa)
-    const ses=loadJSON(LS_USER_SESSION,null);
-    let tallerHtml='';
-    if(ses){
-      const wa=(configTienda.whatsapp||'').replace(/\D/g,'');
-      const waLink=wa? 'https://wa.me/'+wa : '';
-      tallerHtml=
-        '<div class="detail-taller-box">'+
-          '<div class="detail-taller-title">🏠 Datos del taller</div>'+
-          '<div class="detail-taller-row"><span>📍 Dirección</span><strong>'+escapeHtml(configTienda.direccionTaller||'—')+'</strong></div>'+
-          '<div class="detail-taller-row"><span>📞 Teléfono</span><strong>'+escapeHtml(configTienda.telefonoTaller||configTienda.whatsapp||'—')+'</strong></div>'+
-          '<div class="detail-taller-row"><span>🕒 Horario</span><strong>'+escapeHtml(configTienda.horarioDias||'')+' '+escapeHtml(configTienda.horarioApertura||'08:00')+' - '+escapeHtml(configTienda.horarioCierre||'18:00')+'</strong></div>'+
-          '<div class="detail-taller-row"><span>⏳ Tiempo de espera</span><strong>'+escapeHtml(configTienda.tiempoEsperaDias||'10')+' días</strong></div>'+
-          (configTienda.nequi? '<div class="detail-taller-row"><span>💳 Nequi</span><strong>'+escapeHtml(configTienda.nequi)+'</strong></div>' : '')+
-          (waLink? '<a href="'+waLink+'" target="_blank" class="detail-taller-wa">💬 WhatsApp del taller</a>' : '')+
-        '</div>';
-    }
+    // No mostrar datos del taller en el detalle del producto (solo en mis solicitudes aprobadas y panel admin)
     productDetailBody.innerHTML=(
       '<div class="product-detail-content">'+
         '<div class="product-detail-img-col">'+
@@ -443,7 +405,11 @@
           '</div>'+
         '</div>'+
       '</div>'+
-      tallerHtml+
+      (tallasList.length>0
+        ? '<div class="detail-tallas-row" style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">'+
+            tallasList.map(t=>'<button type="button" class="talla-btn'+(tallaSeleccionada===t?' selected':'')+'" onclick="seleccionarTalla(\''+escapeHtml(t)+'\')" style="padding:8px 16px;border-radius:50px;border:1.5px solid rgba(240,86,122,0.3);background:'+(tallaSeleccionada===t?'#f0567a':'white')+';color:'+(tallaSeleccionada===t?'white':'#1a0a14')+';font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s;">'+escapeHtml(t)+'</button>').join('')+
+          '</div>'
+        : '')+
       '<div class="detail-actions">'+
         '<div class="detail-qty-row">'+
           '<span class="detail-qty-label">Cantidad a solicitar</span>'+
@@ -466,6 +432,7 @@
     if(!p) return;
     productoDetalleActual=p;
     detalleCantidad=1;
+    tallaSeleccionada='';
     renderDetalleProducto();
     if(productDetailOverlay) productDetailOverlay.classList.add('show');
     if(productDetailPanel) productDetailPanel.classList.add('show');
@@ -474,6 +441,24 @@
   window.cerrarDetalleProducto=function(){
     if(productDetailOverlay) productDetailOverlay.classList.remove('show');
     if(productDetailPanel) productDetailPanel.classList.remove('show');
+  };
+
+  function mostrarAlertaTallaDetalle(texto){
+    if(!productDetailBody) return;
+    // quitar alerta previa si existe
+    const previa=productDetailBody.querySelector('.alerta-talla-detalle');
+    if(previa) previa.remove();
+    const div=document.createElement('div');
+    div.className='alerta-talla-detalle';
+    div.style.cssText='background:#fff3cd;border:1px solid #ffeeba;color:#856404;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:13px;font-weight:600;text-align:center;';
+    div.textContent=texto;
+    productDetailBody.prepend(div);
+    productDetailBody.scrollTop=0;
+  }
+
+  window.seleccionarTalla=function(talla){
+    tallaSeleccionada=talla;
+    renderDetalleProducto();
   };
 
   window.cambiarCantidadDetalle=function(delta){
@@ -488,10 +473,15 @@
     const p=productoDetalleActual;
     if(!p) return;
     if(!p.disponible || Number(p.disponible)===0){ showToast('😕 Producto no disponible por el momento'); return; }
+    const tallasReq=(p.tallas||'').split(',').map(t=>t.trim()).filter(Boolean);
+    if(tallasReq.length>0 && !tallaSeleccionada){
+      mostrarAlertaTallaDetalle('⚠️ Selecciona una talla antes de solicitar este producto.');
+      return;
+    }
     const ses=loadJSON(LS_USER_SESSION,null);
-    const existente=carrito.find((item)=>String(item.id)===String(p.id));
+    const existente=carrito.find((item)=>String(item.id)===String(p.id) && item.talla===tallaSeleccionada);
     if(existente) existente.cantidad+=detalleCantidad;
-    else carrito.push({id:p.id,nombre:p.nombre,precio:Number(p.precio)||0,categoria:p.categoria,color:p.color||'',imagen:p.imagen||'',cantidad:detalleCantidad});
+    else carrito.push({id:p.id,nombre:p.nombre,precio:Number(p.precio)||0,categoria:p.categoria,color:p.color||'',imagen:p.imagen||'',talla:tallaSeleccionada,cantidad:detalleCantidad});
     persistCarrito(); renderCarrito();
     showToast('🛒 "'+p.nombre+'" x'+detalleCantidad+' añadido');
     cerrarDetalleProducto();
@@ -526,6 +516,20 @@
     saveJSON('cym_redirect_after_login', {to:'tienda', carrito: carrito, email: email.trim()});
     window.location.href = LOGIN_PAGE + '?prefill=' + encodeURIComponent(email.trim());
   };
+  function estaAbiertoPorHorario() {
+    try{
+      const now=new Date();
+      const dia=now.getDay();
+      if(dia===0) return false;
+      const hh=String(now.getHours()).padStart(2,'0');
+      const mm=String(now.getMinutes()).padStart(2,'0');
+      const horaActual=hh+':'+mm;
+      const ap=configTienda.horarioApertura||'08:00';
+      const ci=configTienda.horarioCierre||'18:00';
+      return horaActual>=ap && horaActual<=ci;
+    }catch(e){ return true; }
+  }
+
   window.abrirCheckout=function(){ // Si no está registrado va directo al login usuario
     if(!carrito.length) return;
     const sesChk = loadJSON(LS_USER_SESSION,null);
@@ -571,6 +575,7 @@
     const terminosOk = document.getElementById('checkoutTerminos');
     if(terminosOk && !terminosOk.checked){ showToast('Debes aceptar Términos y Condiciones'); return; }
     const metodoPago = (document.getElementById('checkoutMetodoPago')||{}).value || 'contraentrega';
+
     const pedido={
       usuario_id: ses?ses.id:null,
       nombre: document.getElementById('checkoutNombre').value.trim(),
@@ -586,9 +591,30 @@
       terminos: terminosOk ? terminosOk.checked : true,
       items: carrito.map((i)=>({productoId:i.id,nombre:i.nombre,cantidad:i.cantidad,precio:i.precio})),
     };
-    if(!pedido.nombre||!pedido.apellido||!pedido.telefono||!pedido.direccion||!pedido.ciudad||!pedido.departamento){
-      showToast('⚠️ Completa todos los campos: nombre, teléfono, dirección, ciudad y departamento');
-      return;
+
+    if(metodoPago==='recoger_taller'){
+      const nombreRecoge=document.getElementById('checkoutNombreRecoge').value.trim();
+      const telefonoRecoge=document.getElementById('checkoutTelefonoRecoge').value.trim();
+      const fechaRecoge=document.getElementById('checkoutFechaRecoge').value;
+      if(!nombreRecoge||!telefonoRecoge||!fechaRecoge){
+        showToast('⚠️ Completa quién va a recoger, su número y la fecha estimada');
+        return;
+      }
+      const hoy=new Date(); hoy.setHours(0,0,0,0);
+      const selFecha=new Date(fechaRecoge); selFecha.setHours(0,0,0,0);
+      const diffDays=Math.round((selFecha-hoy)/(1000*60*60*24));
+      if(diffDays<0||diffDays>10){
+        showToast('⚠️ La fecha estimada debe ser entre hoy y dentro de 10 días máximo');
+        return;
+      }
+      pedido.nombreRecoge=nombreRecoge;
+      pedido.telefonoRecoge=telefonoRecoge;
+      pedido.fechaRecoge=fechaRecoge;
+    } else {
+      if(!pedido.nombre||!pedido.apellido||!pedido.telefono||!pedido.direccion||!pedido.ciudad||!pedido.departamento){
+        showToast('⚠️ Completa todos los campos: nombre, teléfono, dirección, ciudad y departamento');
+        return;
+      }
     }
     if(!carrito.length){ showToast('Carrito vacío'); return; }
     const prevText = btn ? btn.textContent : '';
@@ -717,39 +743,50 @@
         const pendiente=low==='pendiente';
         const cancelado=low==='cancelado';
         let badgeColor='#f0567a';
-        if(aceptada) badgeColor='#10b981';
-        if(rechazada) badgeColor='#ef4444';
-        if(expirado) badgeColor='#6b7280';
-        if(cancelado) badgeColor='#9ca3af';
-        const codigo=p.codigo_verificacion||'';
-        const metodo = escapeHtml(p.metodo_pago||'contraentrega');
-        const anticipo = p.anticipo_monto ? formatPrecio(p.anticipo_monto) : '';
-        const diasRest = p.dias_restantes!=null ? p.dias_restantes : null;
-        const expiraTxt = p.expira ? formatFecha(p.expira) : '';
-        const waLink= adminWa ? 'https://wa.me/'+adminWa+'?text='+encodeURIComponent('Hola, soy '+ (p.nombre||'') +' — mi solicitud #'+p.id+' con código '+(codigo||'')+' fue aceptada. ¿Confirmamos?') : '';
-        const tiempoTxt = diasRest!=null ? (diasRest<=0 ? '⚠️ Venció' : '⏳ '+diasRest+' días restantes') : (configTienda.tiempoEsperaDias? '⏳ Espera '+configTienda.tiempoEsperaDias+' días' : '');
+        let estadoTexto=estado;
+        if(aceptada){ badgeColor='#10b981'; estadoTexto='🟢 APROBADO — LISTO PARA RECOGER'; }
+        if(rechazada){ badgeColor='#ef4444'; estadoTexto='🔴 RECHAZADA'; }
+        if(expirado){ badgeColor='#6b7280'; estadoTexto='⌛ EXPIRADA'; }
+        if(cancelado){ badgeColor='#9ca3af'; estadoTexto='🚫 CANCELADA'; }
+        if(pendiente){ badgeColor='#f59e0b'; estadoTexto='🟡 PENDIENTE'; }
+        const metodo = p.metodo_pago||'contraentrega';
+        const items = p.items || [];
+        const tallaTexto = items.length? items.map(it=>it.talla||'').filter(Boolean).join(', ') : '';
+        const nombreProd = items.length? items.map(it=>it.nombre||'Producto').join(', ') : 'Producto';
+        const fechaSolicitud = p.fecha? new Date(p.fecha).toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'}) : '';
+        const fechaEntrega = p.fechaRecoge? new Date(p.fechaRecoge).toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'}) : '';
+        const horaEntrega = p.fechaRecoge? ' — 3:00 PM' : '';
+        const waRaw=(configTienda.whatsapp||'').replace(/\D/g,'');
+        const waLink=waRaw? 'https://wa.me/'+waRaw : '';
+        const waDisplay = waRaw ? (waRaw.length>=10 ? waRaw.replace(/^(\d{3})(\d{3})(\d{4})$/,'$1 $2 $3') : waRaw) : '—';
+        const tallerNombre = configTienda.nombreEmpresa||'Karen Confección & Moda';
+        const tallerDir = configTienda.direccionTaller||'Calle 10 # 15-20, Barrio Centro';
+        const tallerFoto = configTienda.fotoTaller||'';
+        const esRecogerTaller = String(p.metodo_pago||'').trim().toLowerCase()==='recoger_taller';
         return (
           '<div style="border:1.5px solid #fce4ec;border-radius:14px;padding:14px;margin-bottom:12px;">'+
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
-              '<strong>Solicitud #'+p.id+'</strong><span style="background:'+badgeColor+';color:white;font-size:11px;padding:3px 8px;border-radius:20px;">'+escapeHtml(estado)+'</span>'+
+              '<strong>Solicitud #'+p.id+' — '+(tallaTexto? 'Talla '+tallaTexto+' ('+escapeHtml(nombreProd)+')' : escapeHtml(nombreProd))+'</strong>'+
+              '<span style="background:'+badgeColor+';color:white;font-size:11px;padding:3px 8px;border-radius:20px;">'+estadoTexto+'</span>'+
             '</div>'+
-            '<div style="font-size:11px;color:#7A7079;margin-bottom:4px;">💳 '+metodo+(anticipo?' • Anticipo '+anticipo:'')+' • '+tiempoTxt+(expiraTxt?' • Expira: '+expiraTxt:'')+'</div>'+
-            '<div style="font-size:12px;color:#9b7b8a;margin-bottom:6px;">'+formatFecha(p.fecha)+' • Total: <strong style="color:#1a0a14;">'+formatPrecio(p.total)+'</strong></div>'+
-            itemsHtml(p.items)+
-            (aceptada
-              ? '<div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:10px;margin:8px 0;text-align:center;">'+
-                  '<div style="font-size:13px;color:#065f46;">✅ <strong>Solicitud aceptada</strong></div>'+
-                  '<div style="font-size:22px;font-weight:800;letter-spacing:2px;color:#047857;margin:6px 0;">'+escapeHtml(codigo)+'</div>'+
-                  '<div style="font-size:11px;color:#065f46;">Muestra este código en el taller: '+escapeHtml(configTienda.direccionTaller||'')+'</div>'+
+            '<div style="font-size:12px;color:#7A7079;margin-bottom:4px;">Fecha de solicitud: '+fechaSolicitud+'</div>'+
+            (fechaEntrega?'<div style="font-size:12px;color:#7A7079;margin-bottom:4px;">Fecha acordada de entrega: '+fechaEntrega+horaEntrega+'</div>':'')+
+            (esRecogerTaller
+              ? '<div style="background:'+(aceptada?'#f0f9ff':'#fef3e2')+';border:1.5px solid '+(aceptada?'#bae6fd':'#fcd34d')+';border-radius:12px;padding:12px;margin:8px 0;">'+
+                  '<div style="font-size:13px;color:'+(aceptada?'#0369a1':'#b45309')+';font-weight:700;margin-bottom:6px;">📍 '+(aceptada?'Datos de Recogida en Taller':'Punto de Recogida en Taller')+'</div>'+
+                  '<div style="font-size:12px;color:#1a0a14;"><strong>Dirección:</strong> '+escapeHtml(tallerDir)+' ('+escapeHtml(tallerNombre)+')</div>'+
+                  (waLink?'<div style="font-size:12px;color:#1a0a14;"><strong>Contacto:</strong> 📲 Escribir por WhatsApp ('+waDisplay+')</div>':'')+
+                  (tallerFoto?'<div style="margin-top:8px;"><strong>Ubicación / Foto del Taller:</strong><br><img src="'+tallerFoto+'" style="width:100%;max-width:260px;border-radius:10px;border:1px solid '+(aceptada?'#bae6fd':'#fcd34d')+';"></div>':'')+
+                  (aceptada?'<div style="margin-top:6px;font-size:11px;color:#047857;font-weight:600;">✅ Lista para recoger en el taller</div>':'<div style="margin-top:6px;font-size:11px;color:#b45309;">⏳ Pendiente de aprobación del admin</div>')+
                 '</div>' : '')+
-            (pendiente ? '<div style="font-size:12px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:8px;border-radius:8px;margin:6px 0;">⏳ En espera — el admin debe aceptar. '+tiempoTxt+'</div>' : '')+
-            (expirado ? '<div style="font-size:12px;color:#444;background:#f3f4f6;border:1px solid #d1d5db;padding:8px;border-radius:8px;margin:6px 0;">⌛ Expirada — pasó el tiempo de espera (1-2 semanas) y se liberó.</div>' : '')+
-            (rechazada ? '<div style="font-size:12px;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;padding:8px;border-radius:8px;margin:6px 0;">❌ Rechazada</div>' : '')+
-            (cancelado ? '<div style="font-size:12px;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;padding:8px;border-radius:8px;margin:6px 0;">🚫 Cancelada por ti</div>' : '')+
-            '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">'+
+            '<div style="font-size:12px;color:#9b7b8a;margin-top:8px;">Total: <strong style="color:#1a0a14;">'+formatPrecio(p.total)+'</strong></div>'+
+            (pendiente ? '<div style="font-size:12px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:8px;border-radius:8px;margin-top:8px;">⏳ En espera — el admin debe aceptar.</div>' : '')+
+            (expirado ? '<div style="font-size:12px;color:#444;background:#f3f4f6;border:1px solid #d1d5db;padding:8px;border-radius:8px;margin-top:8px;">⌛ Expirada — pasó el tiempo de espera y se liberó.</div>' : '')+
+            (rechazada ? '<div style="font-size:12px;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;padding:8px;border-radius:8px;margin-top:8px;">❌ Rechazada</div>' : '')+
+            (cancelado ? '<div style="font-size:12px;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;padding:8px;border-radius:8px;margin-top:8px;">🚫 Cancelada por ti</div>' : '')+
+            '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">'+
               (pendiente ? '<button onclick="cancelarSolicitud(\''+p.id+'\')" style="background:white;border:1.5px solid #fda4af;color:#be123c;padding:6px 10px;border-radius:20px;font-size:11px;cursor:pointer;">Cancelar esta</button>' : '')+
               (aceptada && waLink ? '<a href="'+waLink+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:white;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;">💬 WhatsApp admin</a>' : '')+
-              (aceptada ? '<span style="font-size:10px;color:#9b7b8a;align-self:center;">📍 '+escapeHtml(configTienda.direccionTaller||'')+'</span>' : '')+
             '</div>'+
           '</div>'
         );
@@ -765,8 +802,11 @@
   }
 
   // ---------- Init ----------
-  cargarConfigTienda();
+  cargarConfigTienda().then(() => {
+    poblarSelectCategorias();
+  });
   cargarProductos();
+  poblarSelectCategorias();
   actualizarBadge();
   // Paginación siempre organizada con primera,1,2,3,última
   setTimeout(function(){ paginaActual=1; initPaginacion(); }, 200);

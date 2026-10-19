@@ -18,11 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // ---- Datos de conexión ----
-// Usar variables de entorno para producción, fallback para desarrollo local
-$host = getenv('DB_HOST') ?: '127.0.0.1';
-$dbname = getenv('DB_NAME') ?: 'costuras_y_modas';
-$usuario = getenv('DB_USER') ?: 'root';
-$password = getenv('DB_PASSWORD') ?: ''; // vacío por defecto en XAMPP
+// Si tu MySQL/XAMPP tiene otra contraseña, cámbiala en $password.
+$host = '127.0.0.1';
+$dbname = 'costuras_y_modas';
+$usuario = 'root';
+$password = ''; // vacío por defecto en XAMPP
 
 try {
     $pdo = new PDO(

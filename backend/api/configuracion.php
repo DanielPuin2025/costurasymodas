@@ -22,8 +22,9 @@ if ($metodo === 'GET') {
 }
 
 if ($metodo === 'POST') {
-    // Recibe un objeto tipo {"nombreEmpresa": "...", "whatsapp": "..."} y guarda cada clave
-    $d = leerJSON();
+    // Decodificar JSON manualmente (php://input) para soportar arrays anidados como categoriasProductos
+    $raw = file_get_contents('php://input');
+    $d = json_decode($raw, true) ?: [];
 
     $stmt = $pdo->prepare(
         'INSERT INTO configuracion (clave, valor) VALUES (?, ?)
@@ -31,6 +32,9 @@ if ($metodo === 'POST') {
     );
 
     foreach ($d as $clave => $valor) {
+        if (is_array($valor) || is_object($valor)) {
+            $valor = json_encode($valor);
+        }
         $stmt->execute([$clave, $valor]);
     }
 

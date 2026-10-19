@@ -29,17 +29,19 @@
     terminosCondiciones: 'Solo 2 métodos: 1) Cliente paga y va al local (retiro en taller), 2) Contraentrega por Nequi con anticipo 40.000 COP. Si no estás a la hora acordada sin avisar, se retiene el anticipo. Tiempo espera 1-2 semanas.',
     adminUsuario: 'DSBJ',
     adminPassword: 'DSBJ24032009',
+    // Categorías de producto
+    categoriasProductos: ['Camisas', 'Pantalones', 'Chaquetas', 'Uniformes', 'Overoles', 'Ofertas', 'General'],
   };
 
   function actualizarFaviconYTitle(){
     try{
       let link=document.getElementById('favicon');
       if(!link){ link=document.createElement('link'); link.id='favicon'; link.rel='icon'; link.type='image/png'; document.head.appendChild(link); }
-      if(config.logo) link.href=config.logo;
+      if(config && config.logo) link.href=config.logo;
       else link.href='logo.png';
       let link2=document.querySelector('link[rel="shortcut icon"]');
       if(link2) link2.href=link.href;
-      if(config.nombreEmpresa) document.title=config.nombreEmpresa+' · Panel de Administrador';
+      if(config && config.nombreEmpresa) document.title=config.nombreEmpresa+' · Panel de Administrador';
     }catch(e){}
   }
 
@@ -95,6 +97,7 @@
   let productos = [];
   let pedidos = [];
   let config = Object.assign({}, DEFAULT_CONFIG);
+  config.categoriasProductos = [...DEFAULT_CONFIG.categoriasProductos];
 
   function showToast(message) { // Muestra notificación flotante
     const container = document.getElementById('toast-container');
@@ -129,6 +132,7 @@
 
   function cerrarSesion() { // Borra sesión admin y vuelve al login
     localStorage.removeItem(LS_ADMIN_SESSION);
+    renderMenu(); // Actualizar menú antes de redirigir
     window.location.href = LOGIN_PAGE;
   }
   document.getElementById('btn-salir').addEventListener('click', function () {
@@ -163,6 +167,52 @@
       document.getElementById('config-password').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   });
+
+  // ---------- Renderizar menú lateral según sesión ----------
+  function renderMenu() {
+    const menuOverlay = document.getElementById('menuOverlay');
+    const menuPanel = document.getElementById('menuPanel');
+    const btnCerrarSesionMenu = document.getElementById('btnCerrarSesionMenu');
+    const tallerInfo = document.getElementById('tallerInfoBox');
+    const tallerTelefoMenu = document.getElementById('tallerTelefoMenu');
+    const tallerHorarioMenu = document.getElementById('tallerHorarioMenu');
+    const tallerEsperaMenu = document.getElementById('tallerEsperaMenu');
+    const nequiMenu = document.getElementById('nequiMenu');
+    const tallerWhatsAppMenu = document.getElementById('tallerWhatsAppMenu');
+    
+    if (!menuOverlay || !menuPanel || !btnCerrarSesionMenu) return;
+    
+    // Si hay sesión admin activa
+    if (session && session.role === 'admin') {
+      // Mostrar información del taller
+      if (tallerTelefoMenu) tallerTelefoMenu.textContent = config.telefonoTaller || config.whatsapp || '—';
+      if (tallerHorarioMenu) tallerHorarioMenu.textContent = config.horarioDias + ' ' + config.horarioApertura + '-' + config.horarioCierre;
+      if (tallerEsperaMenu) tallerEsperaMenu.textContent = config.tiempoEsperaDias + ' días';
+      if (nequiMenu) nequiMenu.textContent = config.nequi || 'No configurado';
+      
+      // Mostrar botón de cerrar sesión
+      btnCerrarSesionMenu.style.display = 'block';
+      tallerInfo.style.display = 'block';
+      
+      // Configurar cerrar sesión
+      btnCerrarSesionMenu.onclick = function(e) {
+        e.preventDefault();
+        if (!confirm('¿Seguro que deseas salir del panel?')) return;
+        cerrarSesion();
+      };
+      
+    } else {
+      // Sin sesión: mostrar botón Iniciar sesión, ocultar taller
+      btnCerrarSesionMenu.style.display = 'none';
+      tallerInfo.style.display = 'none';
+      
+      // Botón Iniciar sesión
+      btnCerrarSesionMenu.onclick = function(e) {
+        e.preventDefault();
+        window.location.href = LOGIN_PAGE;
+      };
+    }
+  }
 
   // ---------- Tabs ----------
   const tabs = document.querySelectorAll('.tab');
@@ -217,6 +267,8 @@
   }
   btnNuevoProducto.addEventListener('click', function () {
     resetProductoForm();
+    // FORZAR RECARGA de categorías antes de mostrar el formulario
+    poblarSelectCategoriasProducto();
     productoForm.hidden = false;
     campoNombre.focus();
   });
@@ -269,6 +321,8 @@
   function editarProducto(id) {
     const producto = productos.find((p) => String(p.id) === String(id));
     if (!producto) return;
+  // FORZAR RECARGA de categorías antes de llenar el formulario
+  poblarSelectCategoriasProducto();
   campoProductoId.value = producto.id;
   campoNombre.value = producto.nombre;
   campoCategoria.value = producto.categoria;
@@ -296,11 +350,38 @@
       showToast(resp.mensaje || (resp.advertencia ? 'Producto desactivado' : 'Producto eliminado'));
     } catch (err) { mostrarError(err); }
   }
+  let filtroCategoriaPanel = 'todos';
+
+  function productosFiltradosPanel() {
+    if (filtroCategoriaPanel === 'todos') return productos;
+    return productos.filter((p) => (p.categoria || '').toLowerCase() === filtroCategoriaPanel.toLowerCase());
+  }
+
+  function poblarFiltroCategoriasPanel() {
+    const select = document.getElementById('panelFiltroCategoria');
+    if (!select) return;
+    const cats = obtenerCategorias();
+    let html = '<option value="todos">Todas las categorías</option>';
+    cats.forEach((cat) => {
+      html += '<option value="' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</option>';
+    });
+    select.innerHTML = html;
+    select.onchange = function () {
+      filtroCategoriaPanel = this.value;
+      renderProductos();
+    };
+  }
+
   function renderProductos() {
     listaProductos.innerHTML = '';
+    const lista = productosFiltradosPanel();
     if (productos.length === 0) { productosVacio.hidden = false; return; }
     productosVacio.hidden = true;
-    productos.forEach((producto) => {
+    if (lista.length === 0) {
+      listaProductos.innerHTML = '<p class="empty-state">No hay productos en esta categoría.</p>';
+      return;
+    }
+    lista.forEach((producto) => {
       const disponible = Boolean(Number(producto.disponible));
       const item = document.createElement('div');
       item.className = 'producto-item';
@@ -708,12 +789,16 @@
       tiempoEsperaDias: configTiempoEspera.value.trim() || '10',
       terminosCondiciones: configTerminos.value.trim(),
       adminUsuario: configUsuarioAdmin.value.trim() || 'admin',
+      categoriasProductos: config.categoriasProductos || DEFAULT_CONFIG.categoriasProductos,
     };
     if (configPassword.value.trim()) datos.adminPassword = configPassword.value.trim();
     try {
       await apiSend('configuracion.php', 'POST', datos);
       Object.assign(config, datos);
       showToast('Configuración guardada');
+      // Actualizar también el DEFAULT_CONFIG para que se refleje en el panel
+      DEFAULT_CONFIG.categoriasProductos = datos.categoriasProductos;
+      fillConfigForm();
     } catch (err) { mostrarError(err); }
   });
   async function cargarConfig() {
@@ -724,12 +809,95 @@
       if (datos.horario_apertura !== undefined) config.horarioApertura = datos.horario_apertura;
       if (datos.horario_cierre !== undefined) config.horarioCierre = datos.horario_cierre;
       if (datos.horario_dias !== undefined) config.horarioDias = datos.horario_dias;
+      if (typeof config.categoriasProductos === 'string') {
+        try { config.categoriasProductos = JSON.parse(config.categoriasProductos); } catch(e) { config.categoriasProductos = []; }
+      }
+      if (!Array.isArray(config.categoriasProductos)) config.categoriasProductos = [];
       fillConfigForm();
+      cargarYRenderizarCategorias();
+      poblarSelectCategoriasProducto();
+      poblarFiltroCategoriasPanel();
     } catch (err) { mostrarError(err); }
   }
 
-  (async function init() {
-    await Promise.all([cargarProductos(), cargarPedidos(), cargarConfig()]);
-  })();
+  function obtenerCategorias() {
+    let cats = config.categoriasProductos || DEFAULT_CONFIG.categoriasProductos;
+    if (typeof cats === 'string') {
+      try { cats = JSON.parse(cats); } catch(e) { cats = []; }
+    }
+    if (!Array.isArray(cats)) cats = [];
+    return cats;
+  }
 
-})();
+function poblarSelectCategoriasProducto() {
+  const select = document.getElementById('producto-categoria');
+  if (!select) return;
+  const categorias = obtenerCategorias();
+  let html = '<option value="" disabled selected>Selecciona tipo</option>';
+  categorias.forEach((cat) => {
+    html += '<option value="' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</option>';
+  });
+  select.innerHTML = html;
+}
+
+// NUEVA: Forzar recargar categorías en el selector del formulario producto
+window.forceRefreshCategoriasProducto = function() {
+  poblarSelectCategoriasProducto();
+  showToast('Categorías actualizadas');
+}
+
+  function cargarYRenderizarCategorias() {
+    const categorias = obtenerCategorias();
+    const listaEl = document.getElementById('lista-categorias');
+    if (!listaEl) return;
+
+    if (categorias.length === 0) {
+      listaEl.innerHTML = '<p style="color:#7A7079; font-size:12px;">No hay categorías definidas. Agrega nuevas arriba.</p>';
+      poblarSelectCategoriasProducto();
+      return;
+    }
+
+    let html = '';
+    categorias.forEach((cat) => {
+      html += '<span class="badge badge-activo" style="margin-right: 6px; margin-bottom: 6px; font-size: 12px; padding: 4px 8px; border-radius: 12px; background: #F0567A; color: white;">' + escapeHtml(cat) + '</span>';
+      html += '<button class="btn btn-outline btn-sm" style="margin-left: 4px; padding: 2px 6px; font-size: 11px;" onclick="eliminarCategoria(\'' + cat + '\')">×</button>';
+    });
+    listaEl.innerHTML = html;
+    poblarSelectCategoriasProducto();
+  }
+
+  async function guardarCategorias() {
+    try {
+      await apiSend('configuracion.php', 'POST', { categoriasProductos: config.categoriasProductos || DEFAULT_CONFIG.categoriasProductos });
+      DEFAULT_CONFIG.categoriasProductos = config.categoriasProductos;
+    } catch (err) { mostrarError(err); }
+  }
+
+  window.eliminarCategoria = function(cat) {
+    if (!confirm('¿Eliminar la categoría "' + cat + '"?')) return;
+    config.categoriasProductos = obtenerCategorias().filter(c => c !== cat);
+    cargarYRenderizarCategorias();
+    guardarCategorias();
+  };
+
+  window.agregarCategoria = function() {
+    const input = document.getElementById('nueva-categoria');
+    const nombre = input ? input.value.trim() : '';
+    if (!nombre) { showToast('Ingresa un nombre de categoría'); return; }
+    const existentes = obtenerCategorias().map(c => c.toLowerCase());
+    if (existentes.some(c => c === nombre.toLowerCase())) {
+      showToast('Esa categoría ya existe');
+      return;
+    }
+    config.categoriasProductos = obtenerCategorias().concat(nombre);
+    cargarYRenderizarCategorias();
+    guardarCategorias();
+    if (input) input.value = '';
+  };
+
+  cargarProductos();
+  cargarPedidos();
+  cargarConfig();
+  // Renderizar menú según estado de sesión
+  renderMenu();
+  })();
