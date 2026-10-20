@@ -27,8 +27,8 @@
     anticipoValor: '40000',
     tiempoEsperaDias: '10',
     terminosCondiciones: 'Solo 2 métodos: 1) Cliente paga y va al local (retiro en taller), 2) Contraentrega por Nequi con anticipo 40.000 COP. Si no estás a la hora acordada sin avisar, se retiene el anticipo. Tiempo espera 1-2 semanas.',
-    adminUsuario: 'DSBJ',
-    adminPassword: 'DSBJ24032009',
+    adminUsuario: 'admin123',
+    adminPassword: 'Admin123',
     // Categorías de producto
     categoriasProductos: ['Camisas', 'Pantalones', 'Chaquetas', 'Uniformes', 'Overoles', 'Ofertas', 'General'],
   };

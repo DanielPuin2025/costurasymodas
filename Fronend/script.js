@@ -12,8 +12,8 @@
     adminSession: 'cym_admin_session',
   };
 
-  const ADMIN_USER_DEFAULT = 'DSBJ';
-  const ADMIN_PASSWORD_DEFAULT = 'DSBJ24032009';
+  const ADMIN_USER_DEFAULT = 'admin123';
+  const ADMIN_PASSWORD_DEFAULT = 'Admin123';
 
   const PANEL_PAGE = 'panel.html';
   const TIENDA_PAGE = 'tienda.html';
