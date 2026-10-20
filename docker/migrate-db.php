@@ -67,24 +67,26 @@ try {
         ON DUPLICATE KEY UPDATE clave=clave
     ");
 
-    // Migración 5: Actualizar usuario admin con password correcto
+    // Migración 5: Actualizar usuario admin con password correcto (FORZAR ACTUALIZACIÓN)
     $adminEmail = 'admin@costurasymodas.com';
-    $adminPassword = '$2y$10$qb2Kvg1VUjgT1v9KYvlbVeLaET7CZ7aNhglFSNl/k6lKuGulGiwC'; // admin123
+    $adminPassword = '$2y$10$SVz2smGneEWJv0nDu3MOg.Gto7qkeu1KbPerexb08mwsQmxqDqK5y'; // admin123
 
     $existeAdmin = $pdo->query("SELECT id FROM usuarios WHERE email='$adminEmail'")->fetch();
     if ($existeAdmin) {
-        echo "[migrate-db] Actualizando usuario admin...\n";
+        echo "[migrate-db] FORZANDO actualización de password admin...\n";
         $pdo->exec("
             UPDATE usuarios
-            SET password='$adminPassword', tipo='admin', activo=TRUE
+            SET password='$adminPassword', tipo='admin', activo=TRUE, nombre='Admin', apellido='Principal'
             WHERE email='$adminEmail'
         ");
+        echo "[migrate-db] Password admin actualizado a: admin123\n";
     } else {
         echo "[migrate-db] Creando usuario admin...\n";
         $pdo->exec("
             INSERT INTO usuarios (nombre, apellido, email, password, tipo, activo)
             VALUES ('Admin', 'Principal', '$adminEmail', '$adminPassword', 'admin', TRUE)
         ");
+        echo "[migrate-db] Usuario admin creado con password: admin123\n";
     }
 
     echo "[migrate-db] Migraciones completadas exitosamente\n";
